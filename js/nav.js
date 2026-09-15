@@ -1,4 +1,4 @@
-import { RH_TESTNET_CHAIN, DAILY_ARENA_ABI, TESTNET_ARENA, TESTNET_DOOM_TOKEN, resolveReadRpc } from "./config.js";
+import { activeDoomToken, isTestnetMode } from "./config.js";
 import { shortAddr } from "./format.js";
 import {
   connectWallet,
@@ -18,44 +18,22 @@ function formatCountdown(seconds) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 }
 
-/** Seconds until next UTC midnight (client clock fallback). */
-function clientSecondsToUtcDayEnd() {
+/**
+ * Seconds until next 19:00 UTC (product epoch).
+ * Arena secondsToDayEnd is still midnight until a later contract PR — do not mix that into the chrome timer.
+ */
+function clientSecondsToUtc1900() {
   const now = new Date();
-  const end = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0);
+  const y = now.getUTCFullYear();
+  const m = now.getUTCMonth();
+  const d = now.getUTCDate();
+  let end = Date.UTC(y, m, d, 19, 0, 0);
+  if (now.getTime() >= end) end = Date.UTC(y, m, d + 1, 19, 0, 0);
   return Math.max(0, Math.floor((end - now.getTime()) / 1000));
 }
 
-let cachedChainSeconds = null;
-let cachedAtMs = 0;
-
-async function fetchChainSecondsToDayEnd() {
-  try {
-    const addr = TESTNET_ARENA;
-    if (!addr || addr === "0x0000000000000000000000000000000000000000") return null;
-    const { rpcUrl } = resolveReadRpc(addr);
-    const provider = new ethers.JsonRpcProvider(rpcUrl, RH_TESTNET_CHAIN.chainId);
-    const arena = new ethers.Contract(addr, DAILY_ARENA_ABI, provider);
-    const secs = await arena.secondsToDayEnd();
-    return Number(secs);
-  } catch {
-    return null;
-  }
-}
-
-async function refreshCountdownSources() {
-  const chain = await fetchChainSecondsToDayEnd();
-  if (chain != null && Number.isFinite(chain)) {
-    cachedChainSeconds = chain;
-    cachedAtMs = Date.now();
-  }
-}
-
 function currentCountdownSeconds() {
-  if (cachedChainSeconds != null) {
-    const elapsed = Math.floor((Date.now() - cachedAtMs) / 1000);
-    return Math.max(0, cachedChainSeconds - elapsed);
-  }
-  return clientSecondsToUtcDayEnd();
+  return clientSecondsToUtc1900();
 }
 
 function paintCountdowns() {
@@ -107,7 +85,7 @@ async function onConnectClick() {
 }
 
 async function copyCa() {
-  const full = TESTNET_DOOM_TOKEN;
+  const full = activeDoomToken();
   try {
     await navigator.clipboard.writeText(full);
     const btn = $("btnCopyCa");
@@ -121,7 +99,7 @@ async function copyCa() {
         }, 1400);
     }
   } catch {
-    window.prompt("Testnet $DOOM CA", full);
+    window.prompt(isTestnetMode() ? "Testnet $DOOM CA" : "$DOOM CA", full);
   }
 }
 
@@ -133,6 +111,9 @@ export function mountNav(active) {
   const header = document.querySelector(".site-header");
   if (header) {
     const lbHref = active === "play" ? "#season-pit" : "/leaderboard";
+    const token = activeDoomToken();
+    const caTitle = isTestnetMode() ? `${token} — RH testnet mock $DOOM` : `${token} — $DOOM`;
+    const caTag = isTestnetMode() ? `<span class="ca-tag">testnet</span>` : "";
     header.innerHTML = `
       <a class="wordmark" href="/" aria-label="$DOOM on PONS">
         <span class="wm-dollar">$</span>
@@ -149,12 +130,12 @@ export function mountNav(active) {
       </nav>
       <div class="ca-line">
         <span class="ca-k">CA:</span>
-        <button type="button" class="ca-addr" id="btnCopyCa" title="${TESTNET_DOOM_TOKEN} — RH testnet mock $DOOM">
-          ${shortAddr(TESTNET_DOOM_TOKEN)}
+        <button type="button" class="ca-addr" id="btnCopyCa" title="${caTitle}">
+          ${shortAddr(token)}
         </button>
-        <span class="ca-tag">testnet</span>
+        ${caTag}
       </div>
-      <div class="header-count" title="UTC day ends">
+      <div class="header-count" title="Until 19:00 UTC">
         ${DRIP}
         <span data-countdown>--:--:--</span>
       </div>
@@ -177,9 +158,7 @@ export function mountNav(active) {
   window.addEventListener("doom-wallet", paintConnectButton);
 
   paintCountdowns();
-  refreshCountdownSources().then(paintCountdowns);
   setInterval(paintCountdowns, 1000);
-  setInterval(() => refreshCountdownSources(), 30000);
 
   if (active === "play") {
     document.querySelectorAll('a[href="#season-pit"]').forEach((a) => {
@@ -193,4 +172,4 @@ export function mountNav(active) {
   }
 }
 
-export { formatCountdown, currentCountdownSeconds, refreshCountdownSources, paintCountdowns };
+export { formatCountdown, currentCountdownSeconds, paintCountdowns };

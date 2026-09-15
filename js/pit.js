@@ -1,11 +1,11 @@
 import {
-  TESTNET_ARENA,
+  activeArena,
   DAILY_ARENA_ABI,
   ORACLE_ABI,
   resolveReadRpc,
   explorerAddressUrl,
 } from "./config.js";
-import { shortAddr, formatPrizeCell, formatUsdFromWad, formatDoomAmount } from "./format.js";
+import { shortAddr, formatPrizeCell, formatUsdFromWad, formatDoomAmount, doomWeiToUsdWad } from "./format.js";
 import { getConnectedAddress } from "./wallet.js";
 
 const $ = (id) => document.getElementById(id);
@@ -52,8 +52,14 @@ export function pitMarkup() {
         <h2 class="pit-title">SEASON PIT</h2>
         <div class="pit-timer">
           ${DRIP}
-          <span class="pit-count" data-countdown title="UTC day ends">--:--:--</span>
+          <span class="pit-count" data-countdown title="Until 19:00 UTC">--:--:--</span>
         </div>
+        <div class="pit-jackpot" aria-live="polite">
+          <span class="jk-k">JACKPOT</span>
+          <span class="jk-usd" id="pitJackpotUsd">—</span>
+          <span class="jk-doom" id="pitJackpotDoom"></span>
+        </div>
+        <h3 class="pit-rankings-label">Current rankings</h3>
         <ol class="pit-list" id="pitList">
           <li class="pit-empty">Loading ranked wallets…</li>
         </ol>
@@ -71,7 +77,7 @@ export function paintCachedPit() {
 async function getArena() {
   const { rpcUrl, chain } = resolveReadRpc();
   const provider = new ethers.JsonRpcProvider(rpcUrl, chain.chainId);
-  return { arena: new ethers.Contract(TESTNET_ARENA, DAILY_ARENA_ABI, provider), provider };
+  return { arena: new ethers.Contract(activeArena(), DAILY_ARENA_ABI, provider), provider };
 }
 
 export async function refreshPit({ limit = 10 } = {}) {
@@ -96,6 +102,21 @@ export async function refreshPit({ limit = 10 } = {}) {
 
     cached = { rows, accruedWei: accrued, priceWad };
     paintCachedPit();
+
+    const jackpotUsd = doomWeiToUsdWad(accrued, priceWad);
+    const usdEl = $("pitJackpotUsd");
+    const doomEl = $("pitJackpotDoom");
+    if (usdEl) {
+      usdEl.textContent =
+        jackpotUsd > 0n
+          ? formatUsdFromWad(jackpotUsd)
+          : accrued > 0n
+            ? `${formatDoomAmount(accrued)} $DOOM`
+            : "—";
+    }
+    if (doomEl) {
+      doomEl.textContent = jackpotUsd > 0n ? `${formatDoomAmount(accrued)} $DOOM` : "";
+    }
 
     if ($("dayIdHint")) $("dayIdHint").textContent = String(dayId);
     if ($("poolBal")) $("poolBal").textContent = formatDoomAmount(pool) + " $DOOM";

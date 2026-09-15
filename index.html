@@ -33,8 +33,14 @@
         <h2 class="pit-title">SEASON PIT</h2>
         <div class="pit-timer">
           <img class="skull-drip" src="/assets/skull-drip.svg" alt="" width="14" height="16" />
-          <span class="pit-count" data-countdown title="UTC day ends">--:--:--</span>
+          <span class="pit-count" data-countdown title="Until 19:00 UTC">--:--:--</span>
         </div>
+        <div class="pit-jackpot" aria-live="polite">
+          <span class="jk-k">JACKPOT</span>
+          <span class="jk-usd" id="pitJackpotUsd">—</span>
+          <span class="jk-doom" id="pitJackpotDoom"></span>
+        </div>
+        <h3 class="pit-rankings-label">Current rankings</h3>
         <ol class="pit-list" id="pitList">
           <li class="pit-empty">Loading ranked wallets…</li>
         </ol>
