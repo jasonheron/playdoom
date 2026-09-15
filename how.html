@@ -3,77 +3,69 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>How it works — Doom on Robinhood</title>
+  <meta name="theme-color" content="#101012" />
+  <title>About — $DOOM on PONS</title>
   <link rel="icon" href="assets/token-circle-c-red-d.png" type="image/png" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
 </head>
 <body>
-  <header class="site-header">
-    <div class="brand">
-      <img class="logo" src="assets/token-circle-c-red-d.png" alt="DOOM" width="40" height="40" />
-      <div>
-        <h1><span>DOOM</span> on Robinhood</h1>
-        <p class="hero-sub">How it works · onchain data</p>
-      </div>
-    </div>
-    <nav class="nav" id="siteNav" aria-label="Primary"></nav>
-  </header>
+  <div class="app">
+    <header class="site-header"></header>
+    <main class="page">
+      <section class="panel">
+        <h2>How it works</h2>
+        <p class="note honesty">
+          <strong>Honesty:</strong> Doom runs in the browser (WASM). Scores and fees live onchain.
+          The game loop does <em>not</em> run in the EVM. <strong>PONS $DOOM is not launched yet</strong> —
+          RH testnet uses a mock $DOOM + mock USD oracle so the ranked loop can be demoed.
+        </p>
 
-  <main>
-    <section class="panel">
-      <h2>How it works</h2>
-      <p class="note honesty">
-        <strong>Honesty:</strong> Doom runs in the browser (WASM). Scores and fees live onchain.
-        The game loop does <em>not</em> run in the EVM. <strong>PONS $DOOM is not launched yet</strong> —
-        RH testnet uses a mock $DOOM + mock USD oracle so the ranked loop can be demoed.
-      </p>
+        <h3>Modes</h3>
+        <ul class="clean">
+          <li><strong>Free Play</strong> — free. No ETH, no tokens. Does <em>not</em> enter the daily prize board.</li>
+          <li><strong>Ranked Play</strong> — costs an <strong>owner-set USD amount of PONS $DOOM</strong> (default <strong>$3</strong>)
+            at the live $DOOM USD price. Enters today’s wallet-based prize board.</li>
+        </ul>
 
-      <h3>Modes</h3>
-      <ul class="clean">
-        <li><strong>Freeplay</strong> — free. No ETH, no tokens. Does <em>not</em> enter the daily prize board.</li>
-        <li><strong>Ranked</strong> — costs an <strong>owner-set USD amount of PONS $DOOM</strong> (default <strong>$3</strong>)
-          at the live $DOOM USD price. Enters today’s wallet-based prize board.</li>
-      </ul>
+        <h3>Daily competition</h3>
+        <ul class="clean">
+          <li>Identity = wallet (<code>msg.sender</code>)</li>
+          <li>Epoch = <strong>UTC day</strong></li>
+          <li>Best ranked score per wallet per day</li>
+          <li>Ranked fees → <strong>70% prize / 30% treasury</strong></li>
+          <li>After day end: <code>finalizeDay</code> → top 3 claim <strong>DOOM</strong> at <strong>50 / 30 / 20</strong></li>
+          <li>Owner can change the USD fee with <code>setRankedUsdWad</code> (e.g. $3 → $5) without redeploying</li>
+        </ul>
 
-      <h3>Daily competition</h3>
-      <ul class="clean">
-        <li>Identity = wallet (<code>msg.sender</code>)</li>
-        <li>Epoch = <strong>UTC day</strong></li>
-        <li>Best ranked score per wallet per day</li>
-        <li>Ranked fees → <strong>70% prize / 30% treasury</strong></li>
-        <li>After day end: <code>finalizeDay</code> → top 3 claim <strong>DOOM</strong> at <strong>50 / 30 / 20</strong></li>
-        <li>Owner can change the USD fee with <code>setRankedUsdWad</code> (e.g. $3 → $5) without redeploying</li>
-      </ul>
-
-      <h3>Contracts (Robinhood testnet 46630)</h3>
-      <ul class="clean addr">
-        <li>DailyArena —
-          <a href="https://explorer.testnet.chain.robinhood.com/address/0xC86eB423DcAC1d77fA91566B264fE3227d075E2E" target="_blank" rel="noopener">
-            0xC86eB423DcAC1d77fA91566B264fE3227d075E2E
-          </a>
-        </li>
-        <li>MockDOOM —
-          <a href="https://explorer.testnet.chain.robinhood.com/address/0x3464A3d59D09F31E7C105d50B3008C828A6cbe44" target="_blank" rel="noopener">
-            0x3464A3d59D09F31E7C105d50B3008C828A6cbe44
-          </a>
-        </li>
-        <li>Oracle —
-          <a href="https://explorer.testnet.chain.robinhood.com/address/0x18C359e5EbD62876c183C75c7e67E4D1Daf48434" target="_blank" rel="noopener">
-            0x18C359e5EbD62876c183C75c7e67E4D1Daf48434
-          </a>
-        </li>
-      </ul>
-      <p class="note">
-        Explorer: <a href="https://explorer.testnet.chain.robinhood.com" target="_blank" rel="noopener">explorer.testnet.chain.robinhood.com</a>.
-        After real PONS launch on mainnet, mock oracle is replaced with a live $DOOM USD feed.
-      </p>
-    </section>
-  </main>
-
-  <footer>
-    Shareware Doom E1 only. Not affiliated with id Software or Microsoft.
-  </footer>
+        <h3>Contracts (Robinhood testnet 46630)</h3>
+        <ul class="clean addr">
+          <li>DailyArena —
+            <a href="https://explorer.testnet.chain.robinhood.com/address/0xC86eB423DcAC1d77fA91566B264fE3227d075E2E" target="_blank" rel="noopener">
+              0xC86eB423DcAC1d77fA91566B264fE3227d075E2E
+            </a>
+          </li>
+          <li>Mock $DOOM (testnet CA) —
+            <a href="https://explorer.testnet.chain.robinhood.com/address/0x3464A3d59D09F31E7C105d50B3008C828A6cbe44" target="_blank" rel="noopener">
+              0x3464A3d59D09F31E7C105d50B3008C828A6cbe44
+            </a>
+          </li>
+          <li>Oracle —
+            <a href="https://explorer.testnet.chain.robinhood.com/address/0x18C359e5EbD62876c183C75c7e67E4D1Daf48434" target="_blank" rel="noopener">
+              0x18C359e5EbD62876c183C75c7e67E4D1Daf48434
+            </a>
+          </li>
+        </ul>
+        <p class="note">
+          Explorer: <a href="https://explorer.testnet.chain.robinhood.com" target="_blank" rel="noopener">explorer.testnet.chain.robinhood.com</a>.
+          After real PONS launch on mainnet, mock oracle is replaced with a live $DOOM USD feed.
+        </p>
+      </section>
+    </main>
+    <footer>
+      Shareware Doom E1 only. Not affiliated with id Software or Microsoft.
+    </footer>
+  </div>
   <script type="module" src="js/how.js"></script>
 </body>
 </html>

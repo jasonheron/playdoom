@@ -3,39 +3,42 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Play — Doom on Robinhood</title>
+  <meta name="theme-color" content="#101012" />
+  <title>$DOOM on PONS — Play</title>
   <link rel="icon" href="assets/token-circle-c-red-d.png" type="image/png" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
 </head>
 <body>
-  <header class="site-header">
-    <div class="brand">
-      <img class="logo" src="assets/token-circle-c-red-d.png" alt="DOOM" width="40" height="40" />
-      <div>
-        <h1><span>DOOM</span> on Robinhood</h1>
-        <p class="hero-sub">Episode 1 shareware · play in the browser</p>
+  <div class="app">
+    <header class="site-header"></header>
+    <p id="walletHint" class="wallet-hint" aria-live="polite"></p>
+    <main class="play-home">
+      <div class="game-stage">
+        <iframe class="game" src="game/play.html?embed=1" title="Doom WASM" allow="autoplay; fullscreen; gamepad"></iframe>
       </div>
-    </div>
-    <nav class="nav" id="siteNav" aria-label="Primary"></nav>
-  </header>
-
-  <main>
-    <section class="panel">
-      <h2>Play</h2>
-      <iframe class="game" src="game/play.html" title="Doom WASM" allow="autoplay; fullscreen; gamepad"></iframe>
-      <p class="play-note">
-        Click the canvas for keyboard ·
-        <a href="game/play.html" target="_blank" rel="noopener">Fullscreen</a>
-      </p>
-      <p class="play-note" id="feeNote">Freeplay is free · Ranked = $X of $DOOM</p>
-    </section>
-  </main>
-
-  <footer>
-    Scores &amp; fees settle on Robinhood Chain testnet. Game runs in your browser — not in the EVM.
-    See <a href="how.html">How it works</a>.
-  </footer>
+      <div class="mode-strip">
+        <button type="button" class="mode-btn selected" id="btnFree" aria-pressed="true">Free Play</button>
+        <button type="button" class="mode-btn" id="btnRanked" aria-pressed="false">Ranked Play</button>
+      </div>
+      <p class="mode-note" id="feeNote">Free Play is free · Ranked = $X of $DOOM</p>
+      <section class="pit" id="season-pit">
+        <h2 class="pit-title">SEASON PIT</h2>
+        <div class="pit-timer">
+          <img class="skull-drip" src="assets/skull-drip.svg" alt="" width="14" height="16" />
+          <span class="pit-count" data-countdown title="UTC day ends">--:--:--</span>
+        </div>
+        <ol class="pit-list" id="pitList">
+          <li class="pit-empty">Loading ranked wallets…</li>
+        </ol>
+        <p class="pit-status" id="pitStatus"></p>
+      </section>
+    </main>
+    <footer>
+      Scores &amp; fees settle on Robinhood Chain testnet. Game runs in your browser — not in the EVM.
+      PONS $DOOM is not launched yet.
+    </footer>
+  </div>
   <script type="module" src="js/play.js"></script>
 </body>
 </html>
