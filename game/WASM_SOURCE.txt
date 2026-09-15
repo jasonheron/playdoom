@@ -1,0 +1,4 @@
+websockets-doom.{js,wasm}: prebuilt Chocolate Doom WASM from Cloudflare doom-wasm lineage,
+downloaded from https://silentspacemarine.com/ (public GPL demo) for a playable local demo
+without requiring Emscripten. Rebuild from /workspace/doom-rh/game/doom-wasm with emsdk if desired.
+doom1.wad: Doom v1.9 shareware IWAD, MD5 f0cefca49926d00903cf57551d901abe
