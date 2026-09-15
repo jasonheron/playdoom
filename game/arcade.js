@@ -183,24 +183,45 @@
     return { kills: kills, items: items, secrets: secrets, playerstate: pst, mo: mo, killOff: killOff };
   }
 
+  var PLAYER_SIZES = [288, 292, 296, 300, 304, 308, 312, 316, 320, 324, 328, 272, 280, 256, 336, 352];
+  var TURBO_SIZES = [16, 4, 8, 20, 32];
+
+  function isPlayerBase(h, baseBytes) {
+    var i = baseBytes >> 2;
+    if (i < 0 || i + 54 >= h.length) return false;
+    var byteLen = h.length * 4;
+    if (!looksLikeHeapPtr(h[i], byteLen)) return false;
+    var pst = h[i + 1];
+    if (pst < 0 || pst > 2) return false;
+    if (h[i + 45] !== 200 || h[i + 46] !== 50 || h[i + 47] !== 300 || h[i + 48] !== 50) return false;
+    return true;
+  }
+
   function findPlayer(h, totalsIdx) {
     var totalsBytes = totalsIdx * 4;
-    var searchEnd = totalsBytes;
-    var searchStart = Math.max(0, totalsBytes - 4096);
-    var best = null;
-    for (var off = 0; off < KILL_OFFSETS.length; off++) {
-      var killOff = KILL_OFFSETS[off];
-      for (var addr = searchStart; addr < searchEnd - 256; addr += 4) {
-        var st = readStatsAt(h, addr, killOff);
+    var t, s, base, st;
+    for (t = 0; t < TURBO_SIZES.length; t++) {
+      for (s = 0; s < PLAYER_SIZES.length; s++) {
+        base = totalsBytes - 12 - TURBO_SIZES[t] - 4 * PLAYER_SIZES[s];
+        if (base < 0 || (base & 3) !== 0) continue;
+        if (!isPlayerBase(h, base)) continue;
+        st = readStatsAt(h, base, 212);
         if (!st) continue;
-        st.base = addr;
-        if (st.playerstate === 0 && st.kills === 0 && st.items === 0) {
-          return st;
-        }
-        if (!best) best = st;
+        st.base = base;
+        st.playerSize = PLAYER_SIZES[s];
+        return st;
       }
     }
-    return best;
+    var addr;
+    for (addr = Math.max(0, totalsBytes - 4096); addr < totalsBytes - 200; addr += 4) {
+      if (!isPlayerBase(h, addr)) continue;
+      st = readStatsAt(h, addr, 212);
+      if (!st) continue;
+      st.base = addr;
+      st.playerSize = 0;
+      return st;
+    }
+    return null;
   }
 
   var Arcade = {
@@ -244,6 +265,7 @@
       "totals@" + (Arcade.totalsIdx * 4),
       "player@" + p.base,
       "killcount+" + p.killOff,
+      "sizeof~" + p.playerSize,
       "skillMap@" + (Arcade.skillIdx >= 0 ? Arcade.skillIdx * 4 : "n/a")
     );
     return true;
