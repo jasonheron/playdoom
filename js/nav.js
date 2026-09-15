@@ -1,4 +1,4 @@
-import { RH_TESTNET_CHAIN, DAILY_ARENA_ABI, TESTNET_ARENA, TESTNET_DOOM_TOKEN, resolveReadRpc } from "./config.js";
+import { activeDoomToken, isTestnetMode } from "./config.js";
 import { shortAddr } from "./format.js";
 import {
   connectWallet,
@@ -18,44 +18,22 @@ function formatCountdown(seconds) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 }
 
-/** Seconds until next UTC midnight (client clock fallback). */
-function clientSecondsToUtcDayEnd() {
+/**
+ * Seconds until next 19:00 UTC (product epoch).
+ * Arena secondsToDayEnd is still midnight until a later contract PR — do not mix that into the chrome timer.
+ */
+function clientSecondsToUtc1900() {
   const now = new Date();
-  const end = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0);
+  const y = now.getUTCFullYear();
+  const m = now.getUTCMonth();
+  const d = now.getUTCDate();
+  let end = Date.UTC(y, m, d, 19, 0, 0);
+  if (now.getTime() >= end) end = Date.UTC(y, m, d + 1, 19, 0, 0);
   return Math.max(0, Math.floor((end - now.getTime()) / 1000));
 }
 
-let cachedChainSeconds = null;
-let cachedAtMs = 0;
-
-async function fetchChainSecondsToDayEnd() {
-  try {
-    const addr = TESTNET_ARENA;
-    if (!addr || addr === "0x0000000000000000000000000000000000000000") return null;
-    const { rpcUrl } = resolveReadRpc(addr);
-    const provider = new ethers.JsonRpcProvider(rpcUrl, RH_TESTNET_CHAIN.chainId);
-    const arena = new ethers.Contract(addr, DAILY_ARENA_ABI, provider);
-    const secs = await arena.secondsToDayEnd();
-    return Number(secs);
-  } catch {
-    return null;
-  }
-}
-
-async function refreshCountdownSources() {
-  const chain = await fetchChainSecondsToDayEnd();
-  if (chain != null && Number.isFinite(chain)) {
-    cachedChainSeconds = chain;
-    cachedAtMs = Date.now();
-  }
-}
-
 function currentCountdownSeconds() {
-  if (cachedChainSeconds != null) {
-    const elapsed = Math.floor((Date.now() - cachedAtMs) / 1000);
-    return Math.max(0, cachedChainSeconds - elapsed);
-  }
-  return clientSecondsToUtcDayEnd();
+  return clientSecondsToUtc1900();
 }
 
 function paintCountdowns() {
@@ -65,9 +43,9 @@ function paintCountdowns() {
   });
 }
 
-const SKULL = `<img class="pixel-skull" src="assets/pixel-skull.svg" alt="" width="14" height="14" />`;
-const TROPHY = `<img class="icon-trophy" src="assets/trophy.svg" alt="" width="14" height="14" />`;
-const DRIP = `<img class="skull-drip" src="assets/skull-drip.svg" alt="" width="14" height="16" />`;
+const SKULL = `<img class="pixel-skull" src="/assets/pixel-skull.svg" alt="" width="14" height="14" />`;
+const TROPHY = `<img class="icon-trophy" src="/assets/trophy.svg" alt="" width="14" height="14" />`;
+const DRIP = `<img class="skull-drip" src="/assets/skull-drip.svg" alt="" width="14" height="16" />`;
 
 function paintConnectButton() {
   const btn = $("btnConnect");
@@ -107,7 +85,7 @@ async function onConnectClick() {
 }
 
 async function copyCa() {
-  const full = TESTNET_DOOM_TOKEN;
+  const full = activeDoomToken();
   try {
     await navigator.clipboard.writeText(full);
     const btn = $("btnCopyCa");
@@ -121,26 +99,29 @@ async function copyCa() {
         }, 1400);
     }
   } catch {
-    window.prompt("Testnet $DOOM CA", full);
+    window.prompt(isTestnetMode() ? "Testnet $DOOM CA" : "$DOOM CA", full);
   }
 }
 
 /**
- * @param {"play"|"how"|"leaderboard"} active
+ * @param {"play"|"about"|"leaderboard"} active
  */
 export function mountNav(active) {
   const root = $("siteNav");
   const header = document.querySelector(".site-header");
   if (header) {
-    const lbHref = active === "play" ? "#season-pit" : "leaderboard.html";
+    const lbHref = active === "play" ? "#season-pit" : "/leaderboard";
+    const token = activeDoomToken();
+    const caTitle = isTestnetMode() ? `${token} — RH testnet mock $DOOM` : `${token} — $DOOM`;
+    const caTag = isTestnetMode() ? `<span class="ca-tag">testnet</span>` : "";
     header.innerHTML = `
-      <a class="wordmark" href="index.html" aria-label="$DOOM on PONS">
+      <a class="wordmark" href="/" aria-label="$DOOM on PONS">
         <span class="wm-dollar">$</span>
         <span class="wm-doom">DOOM</span>
         <span class="wm-pons"><span>ON</span><span>PONS</span></span>
       </a>
       <nav class="hud" aria-label="Primary">
-        <a href="how.html" class="hud-link ${active === "how" ? "active" : ""}">${SKULL} ABOUT</a>
+        <a href="/about" class="hud-link ${active === "about" ? "active" : ""}">${SKULL} ABOUT</a>
         <a href="${lbHref}" class="hud-link ${active === "leaderboard" ? "active" : ""}">${TROPHY} LEADERBOARD</a>
         <button type="button" class="hud-link connect" id="btnConnect" aria-pressed="false" title="Optional — viewing does not require a wallet">
           <span class="check" aria-hidden="true"></span>
@@ -149,21 +130,21 @@ export function mountNav(active) {
       </nav>
       <div class="ca-line">
         <span class="ca-k">CA:</span>
-        <button type="button" class="ca-addr" id="btnCopyCa" title="${TESTNET_DOOM_TOKEN} — RH testnet mock $DOOM">
-          ${shortAddr(TESTNET_DOOM_TOKEN)}
+        <button type="button" class="ca-addr" id="btnCopyCa" title="${caTitle}">
+          ${shortAddr(token)}
         </button>
-        <span class="ca-tag">testnet</span>
+        ${caTag}
       </div>
-      <div class="header-count" title="UTC day ends">
+      <div class="header-count" title="Until 19:00 UTC">
         ${DRIP}
         <span data-countdown>--:--:--</span>
       </div>
     `;
   } else if (root) {
     root.innerHTML = `
-      <a href="index.html" class="${active === "play" ? "active" : ""}">Play</a>
-      <a href="how.html" class="${active === "how" ? "active" : ""}">About</a>
-      <a href="leaderboard.html" class="${active === "leaderboard" ? "active" : ""}">Leaderboard</a>
+      <a href="/" class="${active === "play" ? "active" : ""}">Play</a>
+      <a href="/about" class="${active === "about" ? "active" : ""}">About</a>
+      <a href="/leaderboard" class="${active === "leaderboard" ? "active" : ""}">Leaderboard</a>
     `;
   }
 
@@ -177,9 +158,7 @@ export function mountNav(active) {
   window.addEventListener("doom-wallet", paintConnectButton);
 
   paintCountdowns();
-  refreshCountdownSources().then(paintCountdowns);
   setInterval(paintCountdowns, 1000);
-  setInterval(() => refreshCountdownSources(), 30000);
 
   if (active === "play") {
     document.querySelectorAll('a[href="#season-pit"]').forEach((a) => {
@@ -193,4 +172,4 @@ export function mountNav(active) {
   }
 }
 
-export { formatCountdown, currentCountdownSeconds, refreshCountdownSources, paintCountdowns };
+export { formatCountdown, currentCountdownSeconds, paintCountdowns };

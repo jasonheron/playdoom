@@ -1,6 +1,6 @@
 import { mountNav } from "./nav.js";
 import { formatUsdFromWad } from "./format.js";
-import { TESTNET_ARENA, DAILY_ARENA_ABI, resolveReadRpc } from "./config.js";
+import { activeArena, DAILY_ARENA_ABI, resolveReadRpc } from "./config.js";
 import { refreshPit, bindPitWalletRepaint } from "./pit.js";
 import { getConnectedAddress } from "./wallet.js";
 
@@ -48,9 +48,9 @@ async function paintFeeNote() {
   try {
     const { rpcUrl, chain } = resolveReadRpc();
     const provider = new ethers.JsonRpcProvider(rpcUrl, chain.chainId);
-    const arena = new ethers.Contract(TESTNET_ARENA, DAILY_ARENA_ABI, provider);
+    const arena = new ethers.Contract(activeArena(), DAILY_ARENA_ABI, provider);
     const usd = await arena.rankedUsdWad();
-    const rankedTxt = `Ranked = ${formatUsdFromWad(usd)} of $DOOM · wallet-based UTC day. Connect is optional to view.`;
+    const rankedTxt = `Ranked = ${formatUsdFromWad(usd)} of $DOOM · wallet-based day · rolls 19:00 UTC. Connect is optional to view.`;
     el.dataset.ranked = rankedTxt;
     el.dataset.base = `Free Play is free · Ranked = ${formatUsdFromWad(usd)} of $DOOM`;
   } catch {

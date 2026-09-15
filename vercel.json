@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/how", "destination": "/about", "statusCode": 301 },
+    { "source": "/how.html", "destination": "/about", "statusCode": 301 },
+    { "source": "/about.html", "destination": "/about", "statusCode": 301 },
+    { "source": "/leaderboard.html", "destination": "/leaderboard", "statusCode": 301 },
+    { "source": "/index.html", "destination": "/", "statusCode": 301 },
+    { "source": "/game/play.html", "destination": "/game/play", "statusCode": 301 }
+  ],
+  "rewrites": [
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/leaderboard", "destination": "/leaderboard.html" },
+    { "source": "/game/play", "destination": "/game/play.html" }
+  ]
+}

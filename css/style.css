@@ -172,7 +172,6 @@ button { font: inherit; color: inherit; }
 
 .ca-line {
   grid-area: ca;
-}
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -366,6 +365,46 @@ iframe.game {
 }
 .pit-timer img { width: 18px; height: 20px; image-rendering: pixelated; }
 
+.pit-jackpot {
+  margin: 0.55rem 0.2rem 0.1rem;
+  text-align: center;
+  padding: 0.55rem 0.45rem 0.5rem;
+  border: 1px solid var(--accent);
+  background: linear-gradient(180deg, rgba(227, 62, 63, 0.18), rgba(20, 8, 8, 0.55));
+  box-shadow: 0 0 14px rgba(227, 62, 63, 0.35), inset 0 0 18px rgba(227, 62, 63, 0.12);
+}
+.pit-jackpot .jk-k {
+  display: block;
+  letter-spacing: 0.28em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.pit-jackpot .jk-usd {
+  display: block;
+  font-family: "Teko", "Oswald", Impact, sans-serif;
+  font-size: clamp(1.8rem, 8vw, 2.55rem);
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 12px var(--accent), 0 2px 0 #4a0000;
+}
+.pit-jackpot .jk-doom {
+  display: block;
+  color: var(--accent2);
+  font-family: "VT323", ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  font-size: 1.15rem;
+}
+.pit-rankings-label {
+  margin: 0.7rem 0 0;
+  text-align: center;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
 .pit-list {
   list-style: none;
   margin: 0.55rem 0 0;
@@ -482,6 +521,35 @@ main.page {
   color: var(--accent);
   font-weight: 700;
 }
+.about-panel h2 {
+  letter-spacing: 0.03em;
+  font-size: 1.28rem;
+  line-height: 1.28;
+}
+.about-copy p {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #d8d8d8;
+  margin: 0 0 0.9rem;
+  font-weight: 500;
+}
+.about-copy p:last-child { margin-bottom: 0; }
+.link-soon {
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 0.18em;
+  cursor: default;
+}
+.soon-tag {
+  color: #6e6e74;
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+}
+.contracts-soon a {
+  color: var(--muted);
+  font-style: italic;
+}
 .panel h3 {
   margin: 1.1rem 0 0.5rem;
   font-size: 0.95rem;
@@ -496,7 +564,7 @@ main.page {
   margin: 0.75rem 0 0;
   font-weight: 500;
 }
-.note.honesty {
+.note.faq {
   border-left: 3px solid var(--accent);
   padding-left: 0.75rem;
   color: #d0d0d4;

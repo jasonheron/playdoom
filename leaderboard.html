@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#101012" />
   <title>Season Pit — $DOOM on PONS</title>
-  <link rel="icon" href="assets/token-circle-c-red-d.png" type="image/png" />
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="/assets/token-circle-c-red-d.png" type="image/png" />
+  <link rel="stylesheet" href="/css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
 </head>
 <body>
@@ -16,15 +16,21 @@
       <section class="pit" id="season-pit">
         <h2 class="pit-title">SEASON PIT</h2>
         <div class="pit-timer">
-          <img class="skull-drip" src="assets/skull-drip.svg" alt="" width="14" height="16" />
-          <span class="pit-count" data-countdown title="UTC day ends">--:--:--</span>
+          <img class="skull-drip" src="/assets/skull-drip.svg" alt="" width="14" height="16" />
+          <span class="pit-count" data-countdown title="Until 19:00 UTC">--:--:--</span>
+        </div>
+        <div class="pit-jackpot" aria-live="polite">
+          <span class="jk-k">JACKPOT</span>
+          <span class="jk-usd" id="pitJackpotUsd">—</span>
+          <span class="jk-doom" id="pitJackpotDoom"></span>
         </div>
         <div class="pit-meta">
           <span class="badge">UTC day <span id="dayIdHint">—</span></span>
-          <span class="badge accent">today’s prize <span id="dayPrize">—</span></span>
+          <span class="badge accent">jackpot <span id="dayPrize">—</span></span>
           <span class="badge">pool <span id="poolBal">—</span></span>
           <span class="badge">fee <span id="feeUsd">—</span></span>
         </div>
+        <h3 class="pit-rankings-label">Current rankings</h3>
         <ol class="pit-list" id="pitList">
           <li class="pit-empty">Loading ranked wallets…</li>
         </ol>
@@ -32,10 +38,10 @@
       </section>
     </main>
     <footer>
-      Data from DailyArena on Robinhood testnet 46630. Ranked board is wallet-based UTC day.
-      Top-3 prize split 50 / 30 / 20 of today’s on-chain pot.
+      Data from DailyArena on Robinhood testnet 46630. Ranked board is wallet-based.
+      Competition day rolls at 19:00 UTC. Top-3 prize split 50 / 30 / 20 of today’s jackpot.
     </footer>
   </div>
-  <script type="module" src="js/leaderboard.js"></script>
+  <script type="module" src="/js/leaderboard.js"></script>
 </body>
 </html>
