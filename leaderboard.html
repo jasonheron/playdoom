@@ -3,60 +3,39 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Leaderboard — Doom on Robinhood</title>
+  <meta name="theme-color" content="#101012" />
+  <title>Season Pit — $DOOM on PONS</title>
   <link rel="icon" href="assets/token-circle-c-red-d.png" type="image/png" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
 </head>
 <body>
-  <header class="site-header">
-    <div class="brand">
-      <img class="logo" src="assets/token-circle-c-red-d.png" alt="DOOM" width="40" height="40" />
-      <div>
-        <h1><span>DOOM</span> on Robinhood</h1>
-        <p class="hero-sub">Ranked daily board · public read</p>
-      </div>
-    </div>
-    <nav class="nav" id="siteNav" aria-label="Primary"></nav>
-  </header>
-
-  <main>
-    <section class="panel">
-      <h2>Today’s ranked competition</h2>
-      <p class="note" style="margin-top:0">
-        Ends at <strong>UTC midnight</strong>. Countdown also sits next to <em>Leaderboard</em> in the nav.
-        No wallet required to view.
-      </p>
-      <div class="row">
-        <span class="badge">UTC day ends in</span>
-        <span class="countdown-lg" data-countdown>--:--:--</span>
-        <span class="badge">day <span id="dayIdHint">—</span></span>
-      </div>
-      <div class="row stats">
-        <span class="badge accent">pool <span id="poolBal">—</span></span>
-        <span class="badge accent">today’s prize <span id="dayPrize">—</span></span>
-        <span class="badge">fee <span id="feeUsd">—</span></span>
-        <span class="badge">tokens due <span id="feeTokens">—</span></span>
-        <span class="badge">oracle <span id="oraclePrice">—</span></span>
-      </div>
-
-      <table>
-        <thead>
-          <tr><th>#</th><th>Wallet</th><th>Kills</th></tr>
-        </thead>
-        <tbody id="lbBody">
-          <tr><td colspan="3">Loading from RH testnet…</td></tr>
-        </tbody>
-      </table>
-      <div id="lbStatus" class="status">Connecting…</div>
-    </section>
-  </main>
-
-  <footer>
-    Data from DailyArena on Robinhood testnet 46630.
-    <a href="how.html">Contracts &amp; honesty</a> ·
-    <a href="https://explorer.testnet.chain.robinhood.com/address/0xC86eB423DcAC1d77fA91566B264fE3227d075E2E" target="_blank" rel="noopener">Explorer</a>
-  </footer>
+  <div class="app">
+    <header class="site-header"></header>
+    <main class="page">
+      <section class="pit" id="season-pit">
+        <h2 class="pit-title">SEASON PIT</h2>
+        <div class="pit-timer">
+          <img class="skull-drip" src="assets/skull-drip.svg" alt="" width="14" height="16" />
+          <span class="pit-count" data-countdown title="UTC day ends">--:--:--</span>
+        </div>
+        <div class="pit-meta">
+          <span class="badge">UTC day <span id="dayIdHint">—</span></span>
+          <span class="badge accent">today’s prize <span id="dayPrize">—</span></span>
+          <span class="badge">pool <span id="poolBal">—</span></span>
+          <span class="badge">fee <span id="feeUsd">—</span></span>
+        </div>
+        <ol class="pit-list" id="pitList">
+          <li class="pit-empty">Loading ranked wallets…</li>
+        </ol>
+        <p class="pit-status" id="pitStatus"></p>
+      </section>
+    </main>
+    <footer>
+      Data from DailyArena on Robinhood testnet 46630. Ranked board is wallet-based UTC day.
+      Top-3 prize split 50 / 30 / 20 of today’s on-chain pot.
+    </footer>
+  </div>
   <script type="module" src="js/leaderboard.js"></script>
 </body>
 </html>
