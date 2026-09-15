@@ -52,6 +52,15 @@
       padding: 0 0.4rem;
     }
     html.touch-on .legend { display: none; }
+    @media (any-pointer: fine) and (min-width: 760px) {
+      .touch { display: none !important; }
+      html.touch-on .legend { display: block; }
+      html.touch-on .capture { display: flex; }
+    }
+    @media (pointer: coarse) {
+      .legend { display: none; }
+      .capture { display: none; }
+    }
 
     .capture {
       position: absolute;
@@ -89,7 +98,7 @@
       border: 3px solid rgba(227,62,63,0.75);
       background: rgba(10,10,12,0.42);
       box-shadow: 0 0 12px rgba(227,62,63,0.35), inset 0 0 18px rgba(0,0,0,0.45);
-      bottom: 12px;
+      bottom: 22%;
     }
     .stick.move { left: 10px; }
     .stick.look { right: 10px; }

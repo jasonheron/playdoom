@@ -39,12 +39,13 @@
     return document.getElementById(id);
   }
 
-  function isCoarsePointer() {
+  function showTouchControls() {
+    var w = window.innerWidth || 800;
     try {
+      if (window.matchMedia("(any-pointer: fine)").matches && w >= 760) return false;
       if (window.matchMedia("(pointer: coarse)").matches) return true;
-      if (window.matchMedia("(hover: none)").matches) return true;
     } catch (e) { /* ignore */ }
-    return false;
+    return w < 760;
   }
 
   function post(payload) {
@@ -62,28 +63,41 @@
   }
 
   function dispatchKey(type, def) {
-    var init = {
+    var canvas = document.getElementById("canvas");
+    var ev = document.createEvent("Event");
+    ev.initEvent(type, true, true);
+    ev.key = def.key;
+    ev.code = def.code;
+    ev.location = def.location || 0;
+    ev.ctrlKey = def === KEYS.ctrl;
+    ev.shiftKey = def === KEYS.shift;
+    ev.altKey = def === KEYS.alt;
+    ev.metaKey = false;
+    ev.repeat = false;
+    ev.charCode = 0;
+    ev.keyCode = def.keyCode;
+    ev.which = def.keyCode;
+    ev.char = "";
+    ev.locale = "";
+    window.dispatchEvent(ev);
+    document.dispatchEvent(ev);
+    if (canvas) canvas.dispatchEvent(ev);
+  }
+
+  function dispatchMouseButton(down) {
+    var canvas = document.getElementById("canvas");
+    if (!canvas) return;
+    var type = down ? "mousedown" : "mouseup";
+    var ev = new MouseEvent(type, {
       bubbles: true,
       cancelable: true,
-      key: def.key,
-      code: def.code,
-      location: def.location || 0,
       view: window,
-      repeat: type === "keydown" && !!def._repeat,
-      composed: true,
-      ctrlKey: def === KEYS.ctrl,
-      shiftKey: def === KEYS.shift,
-      altKey: def === KEYS.alt,
-    };
-    var ev = new KeyboardEvent(type, init);
-    try {
-      Object.defineProperties(ev, {
-        keyCode: { get: function () { return def.keyCode; } },
-        which: { get: function () { return def.keyCode; } },
-        charCode: { get: function () { return 0; } },
-      });
-    } catch (e) { /* ignore */ }
-    window.dispatchEvent(ev);
+      button: 0,
+      buttons: down ? 1 : 0,
+      clientX: Math.floor(canvas.getBoundingClientRect().left + canvas.clientWidth / 2),
+      clientY: Math.floor(canvas.getBoundingClientRect().top + canvas.clientHeight / 2),
+    });
+    canvas.dispatchEvent(ev);
   }
 
   var held = Object.create(null);
@@ -95,10 +109,12 @@
       if (held[name]) return;
       held[name] = true;
       dispatchKey("keydown", def);
+      if (name === "ctrl") dispatchMouseButton(true);
     } else {
       if (!held[name]) return;
       held[name] = false;
       dispatchKey("keyup", def);
+      if (name === "ctrl") dispatchMouseButton(false);
     }
   }
 
@@ -338,7 +354,7 @@
       return document.pointerLockElement === canvas;
     }
     function sync() {
-      if (hint) hint.hidden = locked() || isCoarsePointer();
+      if (hint) hint.hidden = locked() || showTouchControls();
       document.documentElement.classList.toggle("pointer-locked", locked());
     }
     function capture() {
@@ -440,10 +456,18 @@
   function setupTouch() {
     var layer = $("touchControls");
     if (!layer) return;
-    var show = isCoarsePointer();
-    layer.hidden = !show;
-    document.documentElement.classList.toggle("touch-on", show);
-    if (!show) return;
+    function apply() {
+      var show = showTouchControls();
+      layer.hidden = !show;
+      document.documentElement.classList.toggle("touch-on", show);
+      return show;
+    }
+    apply();
+    window.addEventListener("resize", apply);
+    try {
+      window.matchMedia("(pointer: coarse)").addEventListener("change", apply);
+      window.matchMedia("(any-pointer: fine)").addEventListener("change", apply);
+    } catch (e) { /* ignore */ }
 
     stickHandler($("stickMove"), function (x, y) {
       var dead = 0.28;
