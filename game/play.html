@@ -239,6 +239,27 @@
     var commonArgs = window.DoomArcade.args;
     var Module = {
       onRuntimeInitialized: function () {
+        try {
+          var FS = Module.FS;
+          function ensureDir(p) {
+            var parts = p.split("/").filter(Boolean);
+            var cur = "";
+            parts.forEach(function (part) {
+              cur += "/" + part;
+              try { FS.mkdir(cur); } catch (err) { /* exists */ }
+            });
+          }
+          ensureDir("/libsdl/doom-ws-wasm");
+          ["default.cfg", "chocolate-doom.cfg"].forEach(function (name) {
+            try {
+              FS.writeFile("/libsdl/doom-ws-wasm/" + name, FS.readFile("/" + name));
+            } catch (err) {
+              console.warn("cfg copy failed", name, err);
+            }
+          });
+        } catch (err) {
+          console.warn("cfg install failed", err);
+        }
         DoomArcade.boot({ canvas: canvas });
         try { canvas.focus(); } catch (e) { /* ignore */ }
         callMain(commonArgs);

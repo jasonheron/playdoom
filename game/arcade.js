@@ -249,6 +249,8 @@
       dispatchKey("keyup", def);
       if (name === "ctrl") dispatchMouseButton(false);
     }
+    if (name === "w") holdKey("up", on);
+    if (name === "s") holdKey("down", on);
   }
 
   function releaseAllKeys() {
@@ -541,13 +543,24 @@
     sync();
   }
 
-  /* —— Keyboard: arrows also move (WASD is in default.cfg) —— */
+  /* —— Keyboard: WASD + arrows both walk even if cfg is vanilla —— */
 
   function setupKeyboard() {
+    function mapMove(e, on) {
+      if (e.code === "KeyW" || e.code === "ArrowUp") {
+        holdKey("w", on);
+        holdKey("up", on);
+      }
+      if (e.code === "KeyS" || e.code === "ArrowDown") {
+        holdKey("s", on);
+        holdKey("down", on);
+      }
+      if (e.code === "KeyA") holdKey("a", on);
+      if (e.code === "KeyD") holdKey("d", on);
+    }
     window.addEventListener("keydown", function (e) {
       if (!e.isTrusted) return;
-      if (e.code === "ArrowUp") holdKey("w", true);
-      if (e.code === "ArrowDown") holdKey("s", true);
+      mapMove(e, true);
       if (
         e.code === "ArrowUp" ||
         e.code === "ArrowDown" ||
@@ -560,8 +573,7 @@
     });
     window.addEventListener("keyup", function (e) {
       if (!e.isTrusted) return;
-      if (e.code === "ArrowUp") holdKey("w", false);
-      if (e.code === "ArrowDown") holdKey("s", false);
+      mapMove(e, false);
     });
     window.addEventListener("blur", releaseAllKeys);
   }
@@ -705,8 +717,8 @@
       "-iwad", "doom1.wad",
       "-window", "-nogui", "-nomusic",
       "-noload",
-      "-config", "default.cfg",
-      "-extraconfig", "chocolate-doom.cfg",
+      "-config", "/default.cfg",
+      "-extraconfig", "/chocolate-doom.cfg",
       "-skill", "3",
       "-warp", "1", "1",
     ],

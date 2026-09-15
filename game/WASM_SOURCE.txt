@@ -10,10 +10,15 @@ Input (2026-09): kept Cloudflare doom-wasm / Chocolate Doom. Overlay buttons no 
 dispatch DOM KeyboardEvents (Chromium forces keyCode=0 on synthetic KeyboardEvent, so
 WASD/use/strafe never reached SDL). arcade.js calls Emscripten JSEvents handlers
 directly — the documented approach from emscripten-core/emscripten#3614 — with a plain
-object that has writable keyCode/which. Touch MOVE also injects arrow keys so vanilla
-bindings still walk if default.cfg is ignored. Touch FIRE/USE/STRAFE + sticks sit in a
-control bar below the canvas (not over it). Desktop still uses native WASD/arrows +
-pointer-lock mouse after canvas capture.
+object that has writable keyCode/which.
+
+This build reads/writes cfg under `/libsdl/doom-ws-wasm/` (log: "Using /libsdl/doom-ws-wasm/
+for configuration and saves"). play.html copies default.cfg there and passes
+`-config /default.cfg` so WASD bindings actually load; otherwise Chocolate Doom keeps
+vanilla arrow-to-move and W does nothing. Touch MOVE also injects arrow keys. Desktop
+keydown aliases W/S to up/down arrows as a second path. Touch FIRE/USE/STRAFE + sticks
+sit in a control bar below the canvas (not over it). Desktop still uses pointer-lock
+mouse after canvas capture.
 
 Score source (honest): this Emscripten build exports `_main` / HEAP only. There is no
 documented doom-wasm kill-count API. game/arcade.js scans Module.HEAP32 for E1M1 HMP
