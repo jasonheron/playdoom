@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#101012" />
   <title>$DOOM on PONS — Play</title>
-  <link rel="icon" href="assets/token-circle-c-red-d.png" type="image/png" />
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="/assets/token-circle-c-red-d.png" type="image/png" />
+  <link rel="stylesheet" href="/css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
 </head>
 <body>
@@ -15,7 +15,7 @@
     <p id="walletHint" class="wallet-hint" aria-live="polite"></p>
     <main class="play-home">
       <div class="game-stage">
-        <iframe class="game" id="doomFrame" src="game/play.html?embed=1" title="Doom WASM E1M1" allow="autoplay; fullscreen; gamepad; pointer-lock; keyboard-map"></iframe>
+        <iframe class="game" id="doomFrame" src="/game/play?embed=1" title="Doom WASM E1M1" allow="autoplay; fullscreen; gamepad; pointer-lock; keyboard-map"></iframe>
       </div>
       <div class="run-hud" id="runHud" data-hook="waiting">
         <span class="run-map">E1M1 · HMP</span>
@@ -32,7 +32,7 @@
       <section class="pit" id="season-pit">
         <h2 class="pit-title">SEASON PIT</h2>
         <div class="pit-timer">
-          <img class="skull-drip" src="assets/skull-drip.svg" alt="" width="14" height="16" />
+          <img class="skull-drip" src="/assets/skull-drip.svg" alt="" width="14" height="16" />
           <span class="pit-count" data-countdown title="UTC day ends">--:--:--</span>
         </div>
         <ol class="pit-list" id="pitList">
@@ -46,6 +46,6 @@
       PONS $DOOM is not launched yet.
     </footer>
   </div>
-  <script type="module" src="js/play.js"></script>
+  <script type="module" src="/js/play.js"></script>
 </body>
 </html>

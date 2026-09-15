@@ -482,6 +482,35 @@ main.page {
   color: var(--accent);
   font-weight: 700;
 }
+.about-panel h2 {
+  letter-spacing: 0.03em;
+  font-size: 1.28rem;
+  line-height: 1.28;
+}
+.about-copy p {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #d8d8d8;
+  margin: 0 0 0.9rem;
+  font-weight: 500;
+}
+.about-copy p:last-child { margin-bottom: 0; }
+.link-soon {
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 0.18em;
+  cursor: default;
+}
+.soon-tag {
+  color: #6e6e74;
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+}
+.contracts-soon a {
+  color: var(--muted);
+  font-style: italic;
+}
 .panel h3 {
   margin: 1.1rem 0 0.5rem;
   font-size: 0.95rem;

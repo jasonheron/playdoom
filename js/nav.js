@@ -65,9 +65,9 @@ function paintCountdowns() {
   });
 }
 
-const SKULL = `<img class="pixel-skull" src="assets/pixel-skull.svg" alt="" width="14" height="14" />`;
-const TROPHY = `<img class="icon-trophy" src="assets/trophy.svg" alt="" width="14" height="14" />`;
-const DRIP = `<img class="skull-drip" src="assets/skull-drip.svg" alt="" width="14" height="16" />`;
+const SKULL = `<img class="pixel-skull" src="/assets/pixel-skull.svg" alt="" width="14" height="14" />`;
+const TROPHY = `<img class="icon-trophy" src="/assets/trophy.svg" alt="" width="14" height="14" />`;
+const DRIP = `<img class="skull-drip" src="/assets/skull-drip.svg" alt="" width="14" height="16" />`;
 
 function paintConnectButton() {
   const btn = $("btnConnect");
@@ -126,21 +126,21 @@ async function copyCa() {
 }
 
 /**
- * @param {"play"|"how"|"leaderboard"} active
+ * @param {"play"|"about"|"leaderboard"} active
  */
 export function mountNav(active) {
   const root = $("siteNav");
   const header = document.querySelector(".site-header");
   if (header) {
-    const lbHref = active === "play" ? "#season-pit" : "leaderboard.html";
+    const lbHref = active === "play" ? "#season-pit" : "/leaderboard";
     header.innerHTML = `
-      <a class="wordmark" href="index.html" aria-label="$DOOM on PONS">
+      <a class="wordmark" href="/" aria-label="$DOOM on PONS">
         <span class="wm-dollar">$</span>
         <span class="wm-doom">DOOM</span>
         <span class="wm-pons"><span>ON</span><span>PONS</span></span>
       </a>
       <nav class="hud" aria-label="Primary">
-        <a href="how.html" class="hud-link ${active === "how" ? "active" : ""}">${SKULL} ABOUT</a>
+        <a href="/about" class="hud-link ${active === "about" ? "active" : ""}">${SKULL} ABOUT</a>
         <a href="${lbHref}" class="hud-link ${active === "leaderboard" ? "active" : ""}">${TROPHY} LEADERBOARD</a>
         <button type="button" class="hud-link connect" id="btnConnect" aria-pressed="false" title="Optional — viewing does not require a wallet">
           <span class="check" aria-hidden="true"></span>
@@ -161,9 +161,9 @@ export function mountNav(active) {
     `;
   } else if (root) {
     root.innerHTML = `
-      <a href="index.html" class="${active === "play" ? "active" : ""}">Play</a>
-      <a href="how.html" class="${active === "how" ? "active" : ""}">About</a>
-      <a href="leaderboard.html" class="${active === "leaderboard" ? "active" : ""}">Leaderboard</a>
+      <a href="/" class="${active === "play" ? "active" : ""}">Play</a>
+      <a href="/about" class="${active === "about" ? "active" : ""}">About</a>
+      <a href="/leaderboard" class="${active === "leaderboard" ? "active" : ""}">Leaderboard</a>
     `;
   }
 
