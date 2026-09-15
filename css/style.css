@@ -41,31 +41,25 @@ button { font: inherit; color: inherit; }
 }
 @media (min-width: 860px) {
   .app { width: min(100%, 880px); }
-  .site-header {
-    grid-template-columns: auto 1fr;
-    grid-template-areas:
-      "brand hud"
-      "ca count";
-    padding: 0.55rem 0.85rem 0.45rem;
-  }
-  .hud { justify-self: end; }
+  .site-header { padding: 0.5rem 0.85rem 0.4rem; }
   .hud-link { flex: 0 0 auto; font-size: 0.62rem; padding: 0.42rem 0.55rem; letter-spacing: 0.08em; }
-  .wm-doom { font-size: 2.15rem; }
+  .wm-logo { height: 42px; }
 }
 
 /* —— Header HUD —— */
 .site-header {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr);
   grid-template-areas:
-    "brand count"
-    "hud hud"
-    "ca ca";
+    "brand hud"
+    "ca count";
   align-items: center;
-  gap: 0.28rem 0.4rem;
-  padding: 0.45rem 0.55rem 0.4rem;
+  column-gap: 0.45rem;
+  row-gap: 0;
+  padding: 0.4rem 0.5rem 0.32rem;
   background: linear-gradient(180deg, #1a1012, #101012 70%);
-  border-bottom: 1px solid var(--accent);
+  border-top: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -75,45 +69,31 @@ button { font: inherit; color: inherit; }
   grid-area: brand;
   display: flex;
   align-items: flex-end;
-  gap: 0.06rem;
+  gap: 0.28rem;
   text-decoration: none;
   color: #fff;
   line-height: 0.82;
-  padding-right: 0.1rem;
+  padding: 0.1rem 0.1rem 0.28rem;
   min-width: 0;
 }
 .wordmark:hover { text-decoration: none; filter: brightness(1.08); }
-.wm-dollar {
-  font-family: Impact, "Haettenschweiler", "Oswald", sans-serif;
-  font-weight: 700;
-  font-size: 0.95rem;
-  align-self: flex-start;
-  margin-top: 0.06rem;
-  text-shadow: 0 0 8px var(--accent), 0 0 2px #fff;
-}
-.wm-doom {
-  font-family: Impact, "Haettenschweiler", "Oswald", sans-serif;
-  font-weight: 700;
-  font-style: italic;
-  font-size: clamp(1.7rem, 8vw, 2.25rem);
-  letter-spacing: -0.02em;
-  color: #f6f6f6;
-  -webkit-text-stroke: 1px var(--accent);
-  text-shadow:
-    0 0 6px var(--accent),
-    0 0 18px rgba(227, 62, 63, 0.85),
-    2px 2px 0 #4a0000;
+.wm-logo {
+  display: block;
+  height: clamp(28px, 9vw, 38px);
+  width: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 6px rgba(227, 62, 63, 0.45));
 }
 .wm-pons {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  font-size: clamp(0.42rem, 1.5vw, 0.58rem);
-  letter-spacing: 0.14em;
+  font-size: clamp(0.38rem, 1.6vw, 0.52rem);
+  letter-spacing: 0.16em;
   line-height: 1.05;
-  font-weight: 600;
+  font-weight: 700;
   color: #ececec;
-  margin: 0 0 0.14rem 0.08rem;
+  margin: 0 0 0.08rem 0;
   text-shadow: 0 0 6px rgba(227, 62, 63, 0.4);
 }
 
@@ -152,17 +132,7 @@ button { font: inherit; color: inherit; }
 .hud-link.active { color: #fff; background: rgba(227, 62, 63, 0.18); }
 .hud-link img { display: block; width: 13px; height: 13px; image-rendering: pixelated; }
 .hud-link.connect { padding-right: 0.5rem; }
-.check {
-  width: 11px;
-  height: 11px;
-  border: 1.5px solid #ddd;
-  background: #0a0a0a;
-  flex-shrink: 0;
-}
-.check.on {
-  background: var(--accent);
-  box-shadow: inset 0 0 0 2px #0a0a0a;
-}
+.hud-link.connect.is-connected .icon-wallet { filter: drop-shadow(0 0 4px var(--accent)); }
 .hud-link.connect.nudge {
   animation: nudge 0.35s ease 0s 3;
 }
@@ -180,6 +150,8 @@ button { font: inherit; color: inherit; }
   letter-spacing: 0.06em;
   font-weight: 500;
   min-width: 0;
+  padding: 0.28rem 0.05rem 0.08rem;
+  border-top: 1px solid var(--accent);
 }
 .ca-k { color: #7a7a80; }
 .ca-addr {
@@ -215,6 +187,8 @@ button { font: inherit; color: inherit; }
   letter-spacing: 0.04em;
   color: #f0f0f0;
   text-shadow: 0 0 8px var(--accent);
+  padding: 0.28rem 0.05rem 0.08rem;
+  border-top: 1px solid var(--accent);
 }
 .header-count img { width: 16px; height: 18px; image-rendering: pixelated; }
 
@@ -235,13 +209,19 @@ button { font: inherit; color: inherit; }
   overflow: hidden;
   border: 1px solid #1a1a1a;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  container-type: inline-size;
 }
 iframe.game {
   width: 100%;
   aspect-ratio: 4 / 3;
+  height: auto;
   border: 0;
   display: block;
   background: #000;
+}
+.game-stage.touch-ui iframe.game {
+  aspect-ratio: unset;
+  height: calc(100cqw * 3 / 4 + 10.25rem);
 }
 
 .run-hud {
@@ -605,6 +585,7 @@ footer {
 .hero-sub { color: var(--muted); font-size: 0.85rem; margin: 0.25rem 0 0; }
 
 @media (max-width: 379px) {
-  .hud-link { padding: 0.3rem 0.28rem; font-size: 0.46rem; letter-spacing: 0.04em; }
-  .wm-doom { font-size: 1.22rem; }
+  .hud-link { padding: 0.3rem 0.22rem; font-size: 0.46rem; letter-spacing: 0.04em; }
+  .wm-logo { height: 24px; }
+  .wm-pons { font-size: 0.34rem; }
 }
