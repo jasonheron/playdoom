@@ -22,9 +22,9 @@ export function formatDoomAmount(wei) {
   try {
     const n = Number(ethers.formatUnits(wei, 18));
     if (!Number.isFinite(n) || n === 0) return "0";
-    if (n >= 100) return Math.round(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
-    if (n >= 1) return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    return n.toLocaleString(undefined, { maximumFractionDigits: 4 });
+    if (n >= 10) return Math.round(n).toLocaleString("en-US");
+    if (n >= 1) return n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+    return n.toLocaleString("en-US", { maximumFractionDigits: 4 });
   } catch {
     return "—";
   }

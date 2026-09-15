@@ -37,21 +37,33 @@ button { font: inherit; color: inherit; }
   min-height: 100vh;
   background: #121214;
   box-shadow: 0 0 0 1px #1c1c20, 0 0 60px rgba(227, 62, 63, 0.12);
+  overflow-x: hidden;
 }
 @media (min-width: 860px) {
   .app { width: min(100%, 880px); }
+  .site-header {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "brand hud"
+      "ca count";
+    padding: 0.55rem 0.85rem 0.45rem;
+  }
+  .hud { justify-self: end; }
+  .hud-link { flex: 0 0 auto; font-size: 0.62rem; padding: 0.42rem 0.55rem; letter-spacing: 0.08em; }
+  .wm-doom { font-size: 2.15rem; }
 }
 
 /* —— Header HUD —— */
 .site-header {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   grid-template-areas:
-    "brand hud hud"
-    "ca ca count";
+    "brand count"
+    "hud hud"
+    "ca ca";
   align-items: center;
-  gap: 0.28rem 0.5rem;
-  padding: 0.5rem 0.65rem 0.45rem;
+  gap: 0.28rem 0.4rem;
+  padding: 0.45rem 0.55rem 0.4rem;
   background: linear-gradient(180deg, #1a1012, #101012 70%);
   border-bottom: 1px solid var(--accent);
   position: sticky;
@@ -63,29 +75,30 @@ button { font: inherit; color: inherit; }
   grid-area: brand;
   display: flex;
   align-items: flex-end;
-  gap: 0.08rem;
+  gap: 0.06rem;
   text-decoration: none;
   color: #fff;
   line-height: 0.82;
-  padding-right: 0.2rem;
+  padding-right: 0.1rem;
+  min-width: 0;
 }
 .wordmark:hover { text-decoration: none; filter: brightness(1.08); }
 .wm-dollar {
-  font-family: "Oswald", Impact, sans-serif;
+  font-family: Impact, "Haettenschweiler", "Oswald", sans-serif;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   align-self: flex-start;
-  margin-top: 0.12rem;
+  margin-top: 0.06rem;
   text-shadow: 0 0 8px var(--accent), 0 0 2px #fff;
 }
 .wm-doom {
-  font-family: "Oswald", Impact, sans-serif;
+  font-family: Impact, "Haettenschweiler", "Oswald", sans-serif;
   font-weight: 700;
   font-style: italic;
-  font-size: clamp(1.55rem, 6.2vw, 2.05rem);
-  letter-spacing: -0.045em;
+  font-size: clamp(1.7rem, 8vw, 2.25rem);
+  letter-spacing: -0.02em;
   color: #f6f6f6;
-  -webkit-text-stroke: 0.6px var(--accent);
+  -webkit-text-stroke: 1px var(--accent);
   text-shadow:
     0 0 6px var(--accent),
     0 0 18px rgba(227, 62, 63, 0.85),
@@ -95,32 +108,36 @@ button { font: inherit; color: inherit; }
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  font-size: 0.52rem;
-  letter-spacing: 0.16em;
+  font-size: clamp(0.42rem, 1.5vw, 0.58rem);
+  letter-spacing: 0.14em;
   line-height: 1.05;
   font-weight: 600;
   color: #ececec;
-  margin: 0 0 0.18rem 0.12rem;
+  margin: 0 0 0.14rem 0.08rem;
   text-shadow: 0 0 6px rgba(227, 62, 63, 0.4);
 }
 
 .hud {
   grid-area: hud;
-  justify-self: end;
+  justify-self: stretch;
   display: flex;
   align-items: stretch;
   background: linear-gradient(180deg, #1c1c20, #101012);
   border: 1.5px solid #c43434;
-  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 11px) 100%, 0 100%, 0 7px);
+  box-shadow: 0 0 10px rgba(227, 62, 63, 0.25), inset 0 0 0 1px rgba(227, 62, 63, 0.12);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 10px) 100%, 0 100%, 0 6px);
   max-width: 100%;
+  min-width: 0;
 }
 .hud-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  flex: 1;
   gap: 0.28rem;
-  padding: 0.4rem 0.48rem;
+  padding: 0.42rem 0.4rem;
   font-size: 0.58rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   font-weight: 700;
   color: #d8d8d8;
   border: 0;
@@ -134,7 +151,7 @@ button { font: inherit; color: inherit; }
 .hud-link:hover { color: #fff; text-decoration: none; background: rgba(227, 62, 63, 0.12); }
 .hud-link.active { color: #fff; background: rgba(227, 62, 63, 0.18); }
 .hud-link img { display: block; width: 13px; height: 13px; image-rendering: pixelated; }
-.hud-link.connect { padding-right: 0.55rem; }
+.hud-link.connect { padding-right: 0.5rem; }
 .check {
   width: 11px;
   height: 11px;
@@ -155,6 +172,7 @@ button { font: inherit; color: inherit; }
 
 .ca-line {
   grid-area: ca;
+}
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -203,11 +221,11 @@ button { font: inherit; color: inherit; }
 
 .wallet-hint {
   margin: 0.25rem 0.75rem 0;
-  min-height: 0.9rem;
   font-size: 0.72rem;
   color: var(--muted);
   letter-spacing: 0.03em;
 }
+.wallet-hint:empty { display: none; }
 
 /* —— Game stage —— */
 .play-home { padding: 0 0 1.5rem; }
@@ -232,20 +250,21 @@ iframe.game {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.55rem;
-  padding: 0.75rem 0.55rem 0.8rem;
+  padding: 0.85rem 0.55rem 0.9rem;
   background:
-    linear-gradient(180deg, rgba(8, 0, 0, 0.15), rgba(8, 0, 0, 0.55)),
-    radial-gradient(80% 90% at 20% 100%, rgba(255, 60, 0, 0.55), transparent 55%),
-    radial-gradient(80% 90% at 80% 110%, rgba(180, 0, 0, 0.5), transparent 50%),
-    url("../assets/pons-banner.png") center 62% / cover no-repeat;
+    linear-gradient(180deg, rgba(8, 0, 0, 0.2), rgba(8, 0, 0, 0.45)),
+    radial-gradient(90% 120% at 18% 120%, #ff3a00 0%, transparent 58%),
+    radial-gradient(90% 120% at 82% 130%, #7a0000 0%, transparent 52%),
+    linear-gradient(180deg, #2a0c08, #5a180c 42%, #1a0604);
 }
 .mode-btn {
   font-family: "Teko", "Oswald", Impact, sans-serif;
   font-weight: 700;
-  font-size: clamp(1.7rem, 7.2vw, 2.45rem);
-  letter-spacing: 0.04em;
+  font-size: clamp(1.45rem, 5.4vw, 2.2rem);
+  letter-spacing: 0.06em;
   line-height: 1;
-  padding: 0.72rem 0.4rem 0.62rem;
+  white-space: nowrap;
+  padding: 0.78rem 0.35rem 0.68rem;
   color: #fff;
   cursor: pointer;
   border: 3px solid var(--accent);
@@ -330,7 +349,7 @@ iframe.game {
 }
 .pit-row {
   display: grid;
-  grid-template-columns: 1.55rem 1.15rem minmax(0, 1fr) auto auto;
+  grid-template-columns: 1.55rem 1.35rem minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem 0.4rem;
@@ -494,7 +513,6 @@ footer {
 .hero-sub { color: var(--muted); font-size: 0.85rem; margin: 0.25rem 0 0; }
 
 @media (max-width: 379px) {
-  .hud-link { padding: 0.36rem 0.32rem; font-size: 0.5rem; letter-spacing: 0.06em; }
-  .wm-doom { font-size: 1.4rem; }
-  .connect-label { max-width: 5.8rem; overflow: hidden; text-overflow: ellipsis; }
+  .hud-link { padding: 0.3rem 0.28rem; font-size: 0.46rem; letter-spacing: 0.04em; }
+  .wm-doom { font-size: 1.22rem; }
 }

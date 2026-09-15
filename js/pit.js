@@ -10,7 +10,7 @@ import { getConnectedAddress } from "./wallet.js";
 
 const $ = (id) => document.getElementById(id);
 
-const SKULL = `<img class="pixel-skull" src="assets/pixel-skull.svg" alt="" width="16" height="16" />`;
+const SKULL = `<img class="pixel-skull" src="assets/pixel-skull.svg" alt="" width="18" height="18" />`;
 const DRIP = `<img class="skull-drip" src="assets/skull-drip.svg" alt="" width="14" height="16" />`;
 
 function isYou(player) {
