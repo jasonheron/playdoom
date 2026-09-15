@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Doom 1 (shareware) — WASM</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Doom 1 shareware — E1M1 arcade</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
   <style>
     @font-face {
       font-family: "VT323";
@@ -13,40 +13,239 @@
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; background: #111; color: #ddd; font-family: VT323, monospace; }
-    #wrap { max-width: 930px; margin: 0 auto; padding: 1rem; }
-    canvas.frame { background: #000; width: 800px; height: 600px; max-width: 100%; display: block; margin: 0 auto; }
+    #wrap { max-width: 930px; margin: 0 auto; padding: 1rem; position: relative; }
+    canvas.frame { background: #000; width: 800px; height: 600px; max-width: 100%; display: block; margin: 0 auto; touch-action: none; }
     .hint { text-align: center; opacity: 0.7; margin-top: 0.5rem; }
     html.embed, html.embed body { width: 100%; height: 100%; background: #000; overflow: hidden; }
     html.embed #wrap { max-width: none; width: 100%; height: 100%; padding: 0; }
     html.embed canvas.frame { width: 100%; height: 100%; max-width: none; }
-    html.embed .hint { display: none; }
+
+    .hud {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      gap: 0.55rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 0.35rem 0.5rem;
+      background: linear-gradient(180deg, rgba(0,0,0,0.72), transparent);
+      pointer-events: none;
+      font-size: clamp(0.85rem, 3.2vw, 1.15rem);
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 6px #000, 0 1px 0 #000;
+      z-index: 3;
+    }
+    .hud b { color: #E33E3F; }
+    .hud .sep { opacity: 0.35; }
+    #statStatus { width: 100%; text-align: center; font-size: 0.75em; letter-spacing: 0.12em; color: #bbb; }
+
+    .legend {
+      position: absolute;
+      left: 0; right: 0; bottom: 0.2rem;
+      text-align: center;
+      font-size: clamp(0.62rem, 2.4vw, 0.85rem);
+      letter-spacing: 0.06em;
+      color: #cfcfcf;
+      text-shadow: 0 0 6px #000;
+      pointer-events: none;
+      z-index: 3;
+      padding: 0 0.4rem;
+    }
+    html.touch-on .legend { display: none; }
+    @media (any-pointer: fine) and (min-width: 760px) {
+      .touch { display: none !important; }
+      html.touch-on .legend { display: block; }
+      html.touch-on .capture { display: flex; }
+    }
+    @media (pointer: coarse) {
+      .legend { display: none; }
+      .capture { display: none; }
+    }
+
+    .capture {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.35);
+      color: #fff;
+      letter-spacing: 0.14em;
+      font-size: clamp(0.85rem, 3vw, 1.2rem);
+      z-index: 4;
+      cursor: pointer;
+    }
+    html.pointer-locked .capture,
+    html.touch-on .capture { display: none; }
+
+    .touch {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .stick, .act {
+      pointer-events: auto;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .stick {
+      position: absolute;
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      border: 3px solid rgba(227,62,63,0.75);
+      background: rgba(10,10,12,0.42);
+      box-shadow: 0 0 12px rgba(227,62,63,0.35), inset 0 0 18px rgba(0,0,0,0.45);
+      bottom: 22%;
+    }
+    .stick.move { left: 10px; }
+    .stick.look { right: 10px; }
+    .stick .knob {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 48px; height: 48px;
+      margin: -24px 0 0 -24px;
+      border-radius: 50%;
+      background: rgba(227,62,63,0.85);
+      box-shadow: 0 0 10px rgba(227,62,63,0.8);
+      pointer-events: none;
+    }
+    .stick .lbl {
+      position: absolute;
+      left: 0; right: 0; top: -1.15rem;
+      text-align: center;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      color: #f0f0f0;
+      text-shadow: 0 0 4px #000;
+      pointer-events: none;
+    }
+    .actions {
+      position: absolute;
+      right: 10px;
+      bottom: 140px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .act {
+      min-width: 72px;
+      min-height: 52px;
+      padding: 0.35rem 0.55rem;
+      border-radius: 10px;
+      border: 3px solid #E33E3F;
+      background: rgba(40,8,8,0.72);
+      color: #fff;
+      font: 700 1.05rem VT323, monospace;
+      letter-spacing: 0.12em;
+      box-shadow: 0 0 10px rgba(227,62,63,0.45);
+      pointer-events: auto;
+    }
+    .act.fire { min-height: 64px; font-size: 1.25rem; background: rgba(180,20,20,0.82); }
+    .act.down { filter: brightness(1.35); transform: scale(0.97); }
+
+    .result {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      background: rgba(0,0,0,0.78);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      text-align: center;
+      padding: 1rem;
+    }
+    .result[hidden] { display: none !important; }
+    .result h2 {
+      margin: 0;
+      color: #E33E3F;
+      letter-spacing: 0.16em;
+      font-size: clamp(1.4rem, 5vw, 2.2rem);
+    }
+    .result .nums { font-size: clamp(1.1rem, 4vw, 1.6rem); letter-spacing: 0.1em; }
+    .result .nums b { color: #E33E3F; }
+    .result button {
+      margin-top: 0.6rem;
+      font: 700 1.1rem VT323, monospace;
+      letter-spacing: 0.12em;
+      padding: 0.45rem 1.1rem;
+      border: 3px solid #E33E3F;
+      background: #1a0606;
+      color: #fff;
+      cursor: pointer;
+    }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
   </style>
 </head>
 <body>
   <div id="wrap">
-    <canvas class="frame" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
-    <p class="hint">Click canvas for keyboard · Episode 1 shareware (doom1.wad) · Chocolate Doom WASM</p>
+    <canvas class="frame" id="canvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
+    <div class="hud" id="liveHud" aria-live="polite">
+      <span>KILLS <b id="statKills">—</b></span>
+      <span class="sep">·</span>
+      <span>ITEMS <b id="statItems">—</b></span>
+      <span class="sep">·</span>
+      <span>SECRETS <b id="statSecrets">—</b></span>
+      <span class="sep">·</span>
+      <span id="statLevel">E1M1</span>
+      <div id="statStatus">loading E1M1…</div>
+    </div>
+    <div class="legend" id="legend">WASD / arrows move · mouse turn · click fire · space use · shift run · click canvas to capture</div>
+    <div class="capture" id="captureHint">CLICK CANVAS TO CAPTURE</div>
+    <div class="touch" id="touchControls" hidden>
+      <div class="stick move" id="stickMove" role="group" aria-label="Move">
+        <span class="lbl">MOVE</span>
+        <span class="knob"></span>
+      </div>
+      <div class="stick look" id="stickLook" role="group" aria-label="Look">
+        <span class="lbl">LOOK</span>
+        <span class="knob"></span>
+      </div>
+      <div class="actions">
+        <button type="button" class="act fire" id="btnFire">FIRE</button>
+        <button type="button" class="act" id="btnUse">USE</button>
+        <button type="button" class="act" id="btnStrafe">STRAFE</button>
+      </div>
+    </div>
+    <div class="result" id="runResult" hidden>
+      <h2 id="resultTitle">RUN ENDED</h2>
+      <div class="nums">KILLS <b id="resultKills">0</b> · ITEMS <b id="resultItems">0</b> · SECRETS <b id="resultSecrets">0</b></div>
+      <div>E1M1 · Hurt Me Plenty · HEAP hook (not invented)</div>
+      <button type="button" id="btnRestart">PLAY AGAIN</button>
+    </div>
+    <p class="hint">Shareware E1M1 · Hurt Me Plenty · Chocolate Doom WASM</p>
   </div>
   <script>
     (function () {
       var embed = /(?:\?|&)embed=1(?:&|$)/.test(location.search) || window.self !== window.top;
       if (embed) document.documentElement.classList.add("embed");
     })();
-    // Local single-player: no multiplayer websocket server required
-    var commonArgs = ["-iwad", "doom1.wad", "-window", "-nogui", "-nomusic", "-config", "default.cfg"];
+  </script>
+  <script src="arcade.js"></script>
+  <script>
+    var canvas = document.getElementById("canvas");
+    var commonArgs = window.DoomArcade.args;
     var Module = {
-      onRuntimeInitialized: () => { callMain(commonArgs); },
+      onRuntimeInitialized: function () {
+        DoomArcade.boot({ canvas: canvas });
+        callMain(commonArgs);
+      },
       noInitialRun: true,
-      preRun: () => {
+      preRun: function () {
         Module.FS.createPreloadedFile("", "doom1.wad", "doom1.wad", true, true);
         Module.FS.createPreloadedFile("", "default.cfg", "default.cfg", true, true);
+        Module.FS.createPreloadedFile("", "chocolate-doom.cfg", "chocolate-doom.cfg", true, true);
       },
       printErr: function (text) {
         if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(" ");
         console.error(text);
       },
       canvas: (function () {
-        var canvas = document.getElementById("canvas");
         canvas.addEventListener("webglcontextlost", function (e) {
           alert("WebGL context lost — reload the page.");
           e.preventDefault();

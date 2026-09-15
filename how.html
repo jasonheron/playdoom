@@ -19,6 +19,9 @@
           <strong>Honesty:</strong> Doom runs in the browser (WASM). Scores and fees live onchain.
           The game loop does <em>not</em> run in the EVM. <strong>PONS $DOOM is not launched yet</strong> —
           RH testnet uses a mock $DOOM + mock USD oracle so the ranked loop can be demoed.
+          Arcade stats (kills / items / secrets) are read from Chocolate Doom’s live WASM
+          <code>HEAP32</code> (<code>players[0].killcount</code> etc.), not invented and not a
+          documented doom-wasm JS API — Cloudflare’s stdout protocol has no score messages.
         </p>
 
         <h3>Modes</h3>

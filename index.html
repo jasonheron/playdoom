@@ -15,7 +15,14 @@
     <p id="walletHint" class="wallet-hint" aria-live="polite"></p>
     <main class="play-home">
       <div class="game-stage">
-        <iframe class="game" src="game/play.html?embed=1" title="Doom WASM" allow="autoplay; fullscreen; gamepad"></iframe>
+        <iframe class="game" id="doomFrame" src="game/play.html?embed=1" title="Doom WASM E1M1" allow="autoplay; fullscreen; gamepad; pointer-lock; keyboard-map"></iframe>
+      </div>
+      <div class="run-hud" id="runHud" data-hook="waiting">
+        <span class="run-map">E1M1 · HMP</span>
+        <span class="run-stat">KILLS <b id="hudKills">—</b></span>
+        <span class="run-stat">ITEMS <b id="hudItems">—</b></span>
+        <span class="run-stat">SECRETS <b id="hudSecrets">—</b></span>
+        <span class="run-note" id="runNote">Waiting for WASM HEAP hook…</span>
       </div>
       <div class="mode-strip">
         <button type="button" class="mode-btn selected" id="btnFree" aria-pressed="true">Free Play</button>
