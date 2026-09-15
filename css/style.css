@@ -245,6 +245,30 @@ iframe.game {
   background: #000;
 }
 
+.run-hud {
+  margin: 0.45rem 0.7rem 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.2rem 0.7rem;
+  padding: 0.45rem 0.65rem 0.5rem;
+  background: linear-gradient(180deg, #1a1012, #101012);
+  border: 1px solid #3a2224;
+  letter-spacing: 0.08em;
+  font-family: "VT323", ui-monospace, monospace;
+  font-size: 1.05rem;
+}
+.run-map { color: var(--muted); letter-spacing: 0.14em; }
+.run-stat b { color: var(--accent); }
+.run-note {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+.run-hud[data-hook="live"] .run-note { color: #8a8a90; }
+.run-hud[data-hook="dead"] .run-note,
+.run-hud[data-hook="completed"] .run-note { color: var(--accent2); }
+
 .mode-strip {
   margin: 0.55rem 0.7rem 0;
   display: grid;

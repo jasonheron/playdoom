@@ -88,6 +88,50 @@ const ranked = $("btnRanked");
 if (free) free.addEventListener("click", () => setMode("free"));
 if (ranked) ranked.addEventListener("click", onRankedClick);
 
+function paintRunHud(msg) {
+  const hud = $("runHud");
+  const note = $("runNote");
+  const set = (id, val) => {
+    const el = $(id);
+    if (el) el.textContent = val == null || val === "" ? "—" : String(val);
+  };
+  if (msg.type === "doom-run-ready") {
+    if (hud) hud.dataset.hook = "waiting";
+    if (note) note.textContent = "E1M1 Hurt Me Plenty — waiting for live HEAP stats…";
+    return;
+  }
+  if (msg.type === "doom-run-stats") {
+    if (hud) hud.dataset.hook = "live";
+    set("hudKills", msg.kills);
+    set("hudItems", msg.items);
+    set("hudSecrets", msg.secrets);
+    if (note) {
+      note.textContent =
+        "Live from Chocolate Doom HEAP (killcount/itemcount/secretcount) · not invented";
+    }
+    return;
+  }
+  if (msg.type === "doom-run-result") {
+    if (hud) hud.dataset.hook = msg.ended || "ended";
+    set("hudKills", msg.kills);
+    set("hudItems", msg.items);
+    set("hudSecrets", msg.secrets);
+    if (note) {
+      const end =
+        msg.ended === "completed" ? "E1M1 cleared" : msg.ended === "dead" ? "You died" : "Run ended";
+      note.textContent = `${end} · KILLS ${msg.kills} · posted ${msg.runId || ""}`.trim();
+    }
+  }
+}
+
+window.addEventListener("message", (ev) => {
+  const msg = ev.data;
+  if (!msg || typeof msg !== "object") return;
+  if (msg.type === "doom-run-ready" || msg.type === "doom-run-stats" || msg.type === "doom-run-result") {
+    paintRunHud(msg);
+  }
+});
+
 paintFeeNote();
 refreshPit({ limit: 10 });
 setInterval(() => refreshPit({ limit: 10 }), 20000);

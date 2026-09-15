@@ -2,3 +2,12 @@ websockets-doom.{js,wasm}: prebuilt Chocolate Doom WASM from Cloudflare doom-was
 downloaded from https://silentspacemarine.com/ (public GPL demo) for a playable local demo
 without requiring Emscripten. Rebuild from /workspace/doom-rh/game/doom-wasm with emsdk if desired.
 doom1.wad: Doom v1.9 shareware IWAD, MD5 f0cefca49926d00903cf57551d901abe
+
+Arcade autostart: Chocolate Doom CLI `-skill 3 -warp 1 1` (Hurt Me Plenty, E1M1). Kept this
+build instead of switching ports because warp/skill work and stats can be read from HEAP.
+
+Score source (honest): this Emscripten build exports `_main` / HEAP only. There is no
+documented doom-wasm kill-count API. game/arcade.js scans Module.HEAP32 for E1M1 HMP
+totals (6 kills, 37 items, 3 secrets) then locks onto players[0].killcount/itemcount/
+secretcount and playerstate. Live HUD and postMessage {kills,items,secrets,level,runId}
+use those values. Do not treat a "—" HUD as zero — the hook has not locked yet.
