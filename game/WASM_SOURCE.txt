@@ -6,6 +6,20 @@ doom1.wad: Doom v1.9 shareware IWAD, MD5 f0cefca49926d00903cf57551d901abe
 Arcade autostart: Chocolate Doom CLI `-skill 3 -warp 1 1` (Hurt Me Plenty, E1M1). Kept this
 build instead of switching ports because warp/skill work and stats can be read from HEAP.
 
+Input (2026-09): kept Cloudflare doom-wasm / Chocolate Doom. Overlay buttons no longer
+dispatch DOM KeyboardEvents (Chromium forces keyCode=0 on synthetic KeyboardEvent, so
+WASD/use/strafe never reached SDL). arcade.js calls Emscripten JSEvents handlers
+directly — the documented approach from emscripten-core/emscripten#3614 — with a plain
+object that has writable keyCode/which.
+
+This build reads/writes cfg under `/libsdl/doom-ws-wasm/` (log: "Using /libsdl/doom-ws-wasm/
+for configuration and saves"). play.html copies default.cfg there and passes
+`-config /default.cfg` so WASD bindings actually load; otherwise Chocolate Doom keeps
+vanilla arrow-to-move and W does nothing. Touch MOVE also injects arrow keys. Desktop
+keydown aliases W/S to up/down arrows as a second path. Touch FIRE/USE/STRAFE + sticks
+sit in a control bar below the canvas (not over it). Desktop still uses pointer-lock
+mouse after canvas capture.
+
 Score source (honest): this Emscripten build exports `_main` / HEAP only. There is no
 documented doom-wasm kill-count API. game/arcade.js scans Module.HEAP32 for E1M1 HMP
 totals (6 kills, 37 items, 3 secrets) then locks onto players[0].killcount/itemcount/

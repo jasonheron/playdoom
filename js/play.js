@@ -127,10 +127,26 @@ function paintRunHud(msg) {
 window.addEventListener("message", (ev) => {
   const msg = ev.data;
   if (!msg || typeof msg !== "object") return;
+  if (msg.type === "doom-touch-ui") {
+    document.querySelector(".game-stage")?.classList.toggle("touch-ui", !!msg.on);
+    return;
+  }
   if (msg.type === "doom-run-ready" || msg.type === "doom-run-stats" || msg.type === "doom-run-result") {
     paintRunHud(msg);
   }
 });
+
+const stage = document.querySelector(".game-stage");
+const frame = $("doomFrame");
+if (stage && frame) {
+  stage.addEventListener("pointerdown", () => {
+    try {
+      frame.contentWindow && frame.contentWindow.focus();
+    } catch {
+      /* ignore */
+    }
+  });
+}
 
 paintFeeNote();
 refreshPit({ limit: 10 });

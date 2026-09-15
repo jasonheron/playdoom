@@ -13,12 +13,30 @@
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; background: #111; color: #ddd; font-family: VT323, monospace; }
-    #wrap { max-width: 930px; margin: 0 auto; padding: 1rem; position: relative; }
-    canvas.frame { background: #000; width: 800px; height: 600px; max-width: 100%; display: block; margin: 0 auto; touch-action: none; }
+    #wrap { max-width: 930px; margin: 0 auto; padding: 1rem; }
+    #stage { position: relative; background: #000; }
+    canvas.frame {
+      background: #000;
+      width: 800px;
+      height: 600px;
+      max-width: 100%;
+      display: block;
+      margin: 0 auto;
+      touch-action: none;
+    }
     .hint { text-align: center; opacity: 0.7; margin-top: 0.5rem; }
     html.embed, html.embed body { width: 100%; height: 100%; background: #000; overflow: hidden; }
-    html.embed #wrap { max-width: none; width: 100%; height: 100%; padding: 0; }
+    html.embed #wrap {
+      max-width: none;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    html.embed #stage { flex: 1 1 auto; min-height: 0; }
     html.embed canvas.frame { width: 100%; height: 100%; max-width: none; }
+    html.embed .hint { display: none; }
 
     .hud {
       position: absolute;
@@ -40,27 +58,14 @@
     #statStatus { width: 100%; text-align: center; font-size: 0.75em; letter-spacing: 0.12em; color: #bbb; }
 
     .legend {
-      position: absolute;
-      left: 0; right: 0; bottom: 0.2rem;
       text-align: center;
       font-size: clamp(0.62rem, 2.4vw, 0.85rem);
       letter-spacing: 0.06em;
       color: #cfcfcf;
-      text-shadow: 0 0 6px #000;
-      pointer-events: none;
-      z-index: 3;
-      padding: 0 0.4rem;
+      padding: 0.35rem 0.4rem 0.15rem;
     }
     html.touch-on .legend { display: none; }
-    @media (any-pointer: fine) and (min-width: 760px) {
-      .touch { display: none !important; }
-      html.touch-on .legend { display: block; }
-      html.touch-on .capture { display: flex; }
-    }
-    @media (pointer: coarse) {
-      .legend { display: none; }
-      .capture { display: none; }
-    }
+    html.embed .legend { display: none; }
 
     .capture {
       position: absolute;
@@ -78,35 +83,39 @@
     html.pointer-locked .capture,
     html.touch-on .capture { display: none; }
 
-    .touch {
-      position: absolute;
-      inset: 0;
-      z-index: 5;
-      pointer-events: none;
+    .control-bar {
+      flex: 0 0 auto;
+      display: grid;
+      grid-template-columns: minmax(92px, 1fr) auto minmax(92px, 1fr);
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 0.5rem 0.65rem;
+      background: linear-gradient(180deg, #1a1012, #0c0c0e);
+      border-top: 2px solid #E33E3F;
+      user-select: none;
+      -webkit-user-select: none;
     }
+    .control-bar[hidden] { display: none !important; }
     .stick, .act {
-      pointer-events: auto;
       touch-action: none;
       user-select: none;
       -webkit-user-select: none;
     }
     .stick {
-      position: absolute;
-      width: 118px;
-      height: 118px;
+      position: relative;
+      width: min(118px, 28vw);
+      height: min(118px, 28vw);
+      margin: 0.9rem auto 0;
       border-radius: 50%;
       border: 3px solid rgba(227,62,63,0.75);
-      background: rgba(10,10,12,0.42);
+      background: rgba(10,10,12,0.72);
       box-shadow: 0 0 12px rgba(227,62,63,0.35), inset 0 0 18px rgba(0,0,0,0.45);
-      bottom: 22%;
     }
-    .stick.move { left: 10px; }
-    .stick.look { right: 10px; }
     .stick .knob {
       position: absolute;
       left: 50%; top: 50%;
-      width: 48px; height: 48px;
-      margin: -24px 0 0 -24px;
+      width: 42px; height: 42px;
+      margin: -21px 0 0 -21px;
       border-radius: 50%;
       background: rgba(227,62,63,0.85);
       box-shadow: 0 0 10px rgba(227,62,63,0.8);
@@ -114,7 +123,7 @@
     }
     .stick .lbl {
       position: absolute;
-      left: 0; right: 0; top: -1.15rem;
+      left: 0; right: 0; top: -1.05rem;
       text-align: center;
       font-size: 0.72rem;
       letter-spacing: 0.14em;
@@ -123,28 +132,24 @@
       pointer-events: none;
     }
     .actions {
-      position: absolute;
-      right: 10px;
-      bottom: 140px;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      pointer-events: none;
+      align-items: center;
     }
     .act {
-      min-width: 72px;
-      min-height: 52px;
-      padding: 0.35rem 0.55rem;
-      border-radius: 10px;
+      min-width: 76px;
+      min-height: 44px;
+      padding: 0.3rem 0.55rem;
+      border-radius: 8px;
       border: 3px solid #E33E3F;
-      background: rgba(40,8,8,0.72);
+      background: rgba(40,8,8,0.92);
       color: #fff;
       font: 700 1.05rem VT323, monospace;
       letter-spacing: 0.12em;
       box-shadow: 0 0 10px rgba(227,62,63,0.45);
-      pointer-events: auto;
     }
-    .act.fire { min-height: 64px; font-size: 1.25rem; background: rgba(180,20,20,0.82); }
+    .act.fire { min-height: 56px; font-size: 1.25rem; background: rgba(180,20,20,0.92); }
     .act.down { filter: brightness(1.35); transform: scale(0.97); }
 
     .result {
@@ -184,26 +189,29 @@
 </head>
 <body>
   <div id="wrap">
-    <canvas class="frame" id="canvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
-    <div class="hud" id="liveHud" aria-live="polite">
-      <span>KILLS <b id="statKills">—</b></span>
-      <span class="sep">·</span>
-      <span>ITEMS <b id="statItems">—</b></span>
-      <span class="sep">·</span>
-      <span>SECRETS <b id="statSecrets">—</b></span>
-      <span class="sep">·</span>
-      <span id="statLevel">E1M1</span>
-      <div id="statStatus">loading E1M1…</div>
+    <div id="stage">
+      <canvas class="frame" id="canvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
+      <div class="hud" id="liveHud" aria-live="polite">
+        <span>KILLS <b id="statKills">—</b></span>
+        <span class="sep">·</span>
+        <span>ITEMS <b id="statItems">—</b></span>
+        <span class="sep">·</span>
+        <span>SECRETS <b id="statSecrets">—</b></span>
+        <span class="sep">·</span>
+        <span id="statLevel">E1M1</span>
+        <div id="statStatus">loading E1M1…</div>
+      </div>
+      <div class="capture" id="captureHint">CLICK CANVAS TO CAPTURE</div>
+      <div class="result" id="runResult" hidden>
+        <h2 id="resultTitle">RUN ENDED</h2>
+        <div class="nums">KILLS <b id="resultKills">0</b> · ITEMS <b id="resultItems">0</b> · SECRETS <b id="resultSecrets">0</b></div>
+        <div>E1M1 · Hurt Me Plenty · HEAP hook (not invented)</div>
+        <button type="button" id="btnRestart">PLAY AGAIN</button>
+      </div>
     </div>
-    <div class="legend" id="legend">WASD / arrows move · mouse turn · click fire · space use · shift run · click canvas to capture</div>
-    <div class="capture" id="captureHint">CLICK CANVAS TO CAPTURE</div>
-    <div class="touch" id="touchControls" hidden>
+    <div class="control-bar" id="touchControls" hidden>
       <div class="stick move" id="stickMove" role="group" aria-label="Move">
         <span class="lbl">MOVE</span>
-        <span class="knob"></span>
-      </div>
-      <div class="stick look" id="stickLook" role="group" aria-label="Look">
-        <span class="lbl">LOOK</span>
         <span class="knob"></span>
       </div>
       <div class="actions">
@@ -211,13 +219,12 @@
         <button type="button" class="act" id="btnUse">USE</button>
         <button type="button" class="act" id="btnStrafe">STRAFE</button>
       </div>
+      <div class="stick look" id="stickLook" role="group" aria-label="Look">
+        <span class="lbl">LOOK</span>
+        <span class="knob"></span>
+      </div>
     </div>
-    <div class="result" id="runResult" hidden>
-      <h2 id="resultTitle">RUN ENDED</h2>
-      <div class="nums">KILLS <b id="resultKills">0</b> · ITEMS <b id="resultItems">0</b> · SECRETS <b id="resultSecrets">0</b></div>
-      <div>E1M1 · Hurt Me Plenty · HEAP hook (not invented)</div>
-      <button type="button" id="btnRestart">PLAY AGAIN</button>
-    </div>
+    <div class="legend" id="legend">WASD / arrows move · mouse turn · click fire · space use · shift run · click canvas to capture</div>
     <p class="hint">Shareware E1M1 · Hurt Me Plenty · Chocolate Doom WASM</p>
   </div>
   <script>
@@ -232,7 +239,29 @@
     var commonArgs = window.DoomArcade.args;
     var Module = {
       onRuntimeInitialized: function () {
+        try {
+          var FS = Module.FS;
+          function ensureDir(p) {
+            var parts = p.split("/").filter(Boolean);
+            var cur = "";
+            parts.forEach(function (part) {
+              cur += "/" + part;
+              try { FS.mkdir(cur); } catch (err) { /* exists */ }
+            });
+          }
+          ensureDir("/libsdl/doom-ws-wasm");
+          ["default.cfg", "chocolate-doom.cfg"].forEach(function (name) {
+            try {
+              FS.writeFile("/libsdl/doom-ws-wasm/" + name, FS.readFile("/" + name));
+            } catch (err) {
+              console.warn("cfg copy failed", name, err);
+            }
+          });
+        } catch (err) {
+          console.warn("cfg install failed", err);
+        }
         DoomArcade.boot({ canvas: canvas });
+        try { canvas.focus(); } catch (e) { /* ignore */ }
         callMain(commonArgs);
       },
       noInitialRun: true,

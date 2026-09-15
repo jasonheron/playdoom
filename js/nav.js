@@ -46,6 +46,7 @@ function paintCountdowns() {
 const SKULL = `<img class="pixel-skull" src="/assets/pixel-skull.svg" alt="" width="14" height="14" />`;
 const TROPHY = `<img class="icon-trophy" src="/assets/trophy.svg" alt="" width="14" height="14" />`;
 const DRIP = `<img class="skull-drip" src="/assets/skull-drip.svg" alt="" width="14" height="16" />`;
+const WALLET = `<img class="icon-wallet" src="/assets/wallet.svg" alt="" width="14" height="14" />`;
 
 function paintConnectButton() {
   const btn = $("btnConnect");
@@ -54,8 +55,6 @@ function paintConnectButton() {
   const on = Boolean(addr);
   btn.classList.toggle("is-connected", on);
   btn.setAttribute("aria-pressed", on ? "true" : "false");
-  const box = btn.querySelector(".check");
-  if (box) box.classList.toggle("on", on);
   const label = btn.querySelector(".connect-label");
   if (label) label.textContent = on ? shortAddr(addr) : "CONNECT WALLET";
   btn.title = on ? addr : "Optional — viewing does not require a wallet";
@@ -116,15 +115,14 @@ export function mountNav(active) {
     const caTag = isTestnetMode() ? `<span class="ca-tag">testnet</span>` : "";
     header.innerHTML = `
       <a class="wordmark" href="/" aria-label="$DOOM on PONS">
-        <span class="wm-dollar">$</span>
-        <span class="wm-doom">DOOM</span>
+        <img class="wm-logo" src="/assets/doom-wordmark.png" alt="$DOOM" width="220" height="55" />
         <span class="wm-pons"><span>ON</span><span>PONS</span></span>
       </a>
       <nav class="hud" aria-label="Primary">
         <a href="/about" class="hud-link ${active === "about" ? "active" : ""}">${SKULL} ABOUT</a>
         <a href="${lbHref}" class="hud-link ${active === "leaderboard" ? "active" : ""}">${TROPHY} LEADERBOARD</a>
         <button type="button" class="hud-link connect" id="btnConnect" aria-pressed="false" title="Optional — viewing does not require a wallet">
-          <span class="check" aria-hidden="true"></span>
+          ${WALLET}
           <span class="connect-label">CONNECT WALLET</span>
         </button>
       </nav>

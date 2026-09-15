@@ -1,5 +1,12 @@
 /**
- * Arcade layer for Chocolate Doom WASM (Cloudflare doom-wasm).
+ * Arcade layer for Chocolate Doom WASM (Cloudflare doom-wasm / silentspacemarine).
+ *
+ * Input: do not dispatch browser KeyboardEvents. Chrome leaves keyCode=0 on
+ * synthetic KeyboardEvent, so SDL never sees WASD/use/strafe. Feed Emscripten
+ * JSEvents handlers directly (emscripten#3614) with a plain object that has
+ * writable keyCode/which. Hold-pump keydown while a control is down so a
+ * missed tic cannot drop movement. Move stick sends WASD + arrows so both the
+ * shipped default.cfg and vanilla Chocolate Doom bindings walk.
  *
  * Score source (honest): this build only exports Emscripten _main / HEAP — no
  * documented kill-count API and no score lines on stdout. We read live
@@ -62,45 +69,170 @@
     } catch (e) { /* ignore */ }
   }
 
-  function dispatchKey(type, def) {
+  function noop() {}
+
+  function makeKeyEvent(type, def, repeat) {
+    return {
+      type: type,
+      key: def.key,
+      code: def.code,
+      location: def.location || 0,
+      ctrlKey: def === KEYS.ctrl,
+      shiftKey: def === KEYS.shift,
+      altKey: def === KEYS.alt,
+      metaKey: false,
+      repeat: !!repeat,
+      charCode: 0,
+      keyCode: def.keyCode,
+      which: def.keyCode,
+      char: "",
+      locale: "",
+      preventDefault: noop,
+      stopPropagation: noop,
+    };
+  }
+
+  function canvasPoint() {
     var canvas = document.getElementById("canvas");
-    var ev = document.createEvent("Event");
-    ev.initEvent(type, true, true);
-    ev.key = def.key;
-    ev.code = def.code;
-    ev.location = def.location || 0;
-    ev.ctrlKey = def === KEYS.ctrl;
-    ev.shiftKey = def === KEYS.shift;
-    ev.altKey = def === KEYS.alt;
-    ev.metaKey = false;
-    ev.repeat = false;
-    ev.charCode = 0;
-    ev.keyCode = def.keyCode;
-    ev.which = def.keyCode;
-    ev.char = "";
-    ev.locale = "";
-    window.dispatchEvent(ev);
-    document.dispatchEvent(ev);
-    if (canvas) canvas.dispatchEvent(ev);
+    if (!canvas) return { x: 0, y: 0, canvas: null };
+    var r = canvas.getBoundingClientRect();
+    return {
+      x: r.left + r.width / 2,
+      y: r.top + r.height / 2,
+      canvas: canvas,
+    };
+  }
+
+  function makeMouseEvent(type, extra) {
+    var pt = canvasPoint();
+    extra = extra || {};
+    return {
+      type: type,
+      screenX: pt.x,
+      screenY: pt.y,
+      clientX: pt.x,
+      clientY: pt.y,
+      ctrlKey: !!extra.ctrlKey,
+      shiftKey: false,
+      altKey: false,
+      metaKey: false,
+      button: extra.button || 0,
+      buttons: extra.buttons || 0,
+      movementX: extra.movementX || 0,
+      movementY: extra.movementY || 0,
+      preventDefault: noop,
+      stopPropagation: noop,
+    };
+  }
+
+  /**
+   * Established Emscripten SDL path: call JSEvents handlers directly.
+   * Dispatching a DOM KeyboardEvent does not set keyCode in Chromium.
+   */
+  function sdlSend(type, ev) {
+    var handlers = typeof JSEvents !== "undefined" && JSEvents.eventHandlers;
+    if (!handlers || !handlers.length) return 0;
+    var n = 0;
+    var i, h;
+    for (i = 0; i < handlers.length; i++) {
+      h = handlers[i];
+      if (!h || h.eventTypeString !== type || !h.handlerFunc) continue;
+      try {
+        if (typeof JSEvents.inEventHandler === "number") {
+          JSEvents.inEventHandler++;
+          JSEvents.currentEventHandler = h;
+        }
+        h.handlerFunc(ev);
+        n++;
+      } catch (err) {
+        /* ignore a single bad handler */
+      } finally {
+        if (typeof JSEvents.inEventHandler === "number" && JSEvents.inEventHandler > 0) {
+          JSEvents.inEventHandler--;
+        }
+      }
+    }
+    return n;
+  }
+
+  function dispatchKey(type, def) {
+    var ev = makeKeyEvent(type, def, false);
+    if (sdlSend(type, ev)) return;
+    var canvas = document.getElementById("canvas");
+    var fallback = document.createEvent("Event");
+    fallback.initEvent(type, true, true);
+    fallback.key = def.key;
+    fallback.code = def.code;
+    fallback.location = def.location || 0;
+    fallback.ctrlKey = def === KEYS.ctrl;
+    fallback.shiftKey = def === KEYS.shift;
+    fallback.altKey = def === KEYS.alt;
+    fallback.metaKey = false;
+    fallback.repeat = false;
+    fallback.charCode = 0;
+    fallback.keyCode = def.keyCode;
+    fallback.which = def.keyCode;
+    fallback.char = "";
+    fallback.locale = "";
+    window.dispatchEvent(fallback);
+    document.dispatchEvent(fallback);
+    if (canvas) canvas.dispatchEvent(fallback);
   }
 
   function dispatchMouseButton(down) {
+    var type = down ? "mousedown" : "mouseup";
+    var ev = makeMouseEvent(type, { button: 0, buttons: down ? 1 : 0 });
+    if (sdlSend(type, ev)) return;
     var canvas = document.getElementById("canvas");
     if (!canvas) return;
-    var type = down ? "mousedown" : "mouseup";
-    var ev = new MouseEvent(type, {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-      button: 0,
-      buttons: down ? 1 : 0,
-      clientX: Math.floor(canvas.getBoundingClientRect().left + canvas.clientWidth / 2),
-      clientY: Math.floor(canvas.getBoundingClientRect().top + canvas.clientHeight / 2),
-    });
-    canvas.dispatchEvent(ev);
+    canvas.dispatchEvent(
+      new MouseEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        button: 0,
+        buttons: down ? 1 : 0,
+        clientX: ev.clientX,
+        clientY: ev.clientY,
+      })
+    );
+  }
+
+  function dispatchMouseMove(dx) {
+    if (!dx) return;
+    sdlSend("mousemove", makeMouseEvent("mousemove", { movementX: dx, movementY: 0, buttons: 0 }));
   }
 
   var held = Object.create(null);
+  var holdPump = null;
+
+  function anyHeld() {
+    var name;
+    for (name in held) {
+      if (held[name]) return true;
+    }
+    return false;
+  }
+
+  function pumpHeldKeys() {
+    var name;
+    for (name in held) {
+      if (!held[name]) continue;
+      dispatchKey("keydown", KEYS[name]);
+    }
+  }
+
+  function startHoldPump() {
+    if (holdPump) return;
+    holdPump = setInterval(function () {
+      if (!anyHeld()) {
+        clearInterval(holdPump);
+        holdPump = null;
+        return;
+      }
+      pumpHeldKeys();
+    }, 32);
+  }
 
   function holdKey(name, on) {
     var def = KEYS[name];
@@ -110,12 +242,15 @@
       held[name] = true;
       dispatchKey("keydown", def);
       if (name === "ctrl") dispatchMouseButton(true);
+      startHoldPump();
     } else {
       if (!held[name]) return;
       held[name] = false;
       dispatchKey("keyup", def);
       if (name === "ctrl") dispatchMouseButton(false);
     }
+    if (name === "w") holdKey("up", on);
+    if (name === "s") holdKey("down", on);
   }
 
   function releaseAllKeys() {
@@ -408,18 +543,37 @@
     sync();
   }
 
-  /* —— Keyboard: arrows also move —— */
+  /* —— Keyboard: WASD + arrows both walk even if cfg is vanilla —— */
 
   function setupKeyboard() {
+    function mapMove(e, on) {
+      if (e.code === "KeyW" || e.code === "ArrowUp") {
+        holdKey("w", on);
+        holdKey("up", on);
+      }
+      if (e.code === "KeyS" || e.code === "ArrowDown") {
+        holdKey("s", on);
+        holdKey("down", on);
+      }
+      if (e.code === "KeyA") holdKey("a", on);
+      if (e.code === "KeyD") holdKey("d", on);
+    }
     window.addEventListener("keydown", function (e) {
       if (!e.isTrusted) return;
-      if (e.code === "ArrowUp") holdKey("w", true);
-      if (e.code === "ArrowDown") holdKey("s", true);
+      mapMove(e, true);
+      if (
+        e.code === "ArrowUp" ||
+        e.code === "ArrowDown" ||
+        e.code === "ArrowLeft" ||
+        e.code === "ArrowRight" ||
+        e.code === "Space"
+      ) {
+        e.preventDefault();
+      }
     });
     window.addEventListener("keyup", function (e) {
       if (!e.isTrusted) return;
-      if (e.code === "ArrowUp") holdKey("w", false);
-      if (e.code === "ArrowDown") holdKey("s", false);
+      mapMove(e, false);
     });
     window.addEventListener("blur", releaseAllKeys);
   }
@@ -459,7 +613,7 @@
       ev.preventDefault();
       vecFrom(ev);
     });
-    ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
+    ["pointerup", "pointercancel"].forEach(function (type) {
       el.addEventListener(type, function (ev) {
         if (pid == null || ev.pointerId !== pid) return;
         ev.preventDefault();
@@ -470,21 +624,27 @@
 
   function holdBtn(el, keyName) {
     if (!el) return;
+    var pid = null;
     function down(ev) {
       ev.preventDefault();
       ev.stopPropagation();
+      pid = ev.pointerId;
+      try {
+        el.setPointerCapture(pid);
+      } catch (err) { /* ignore */ }
       el.classList.add("down");
       holdKey(keyName, true);
     }
     function up(ev) {
+      if (pid == null || ev.pointerId !== pid) return;
       ev.preventDefault();
+      pid = null;
       el.classList.remove("down");
       holdKey(keyName, false);
     }
     el.addEventListener("pointerdown", down);
-    ["pointerup", "pointercancel", "pointerleave"].forEach(function (t) {
-      el.addEventListener(t, up);
-    });
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
   }
 
   function setupTouch() {
@@ -494,6 +654,7 @@
       var show = showTouchControls();
       layer.hidden = !show;
       document.documentElement.classList.toggle("touch-on", show);
+      post({ type: "doom-touch-ui", on: show });
       return show;
     }
     apply();
@@ -505,16 +666,26 @@
 
     stickHandler($("stickMove"), function (x, y) {
       var dead = 0.28;
-      holdKey("w", y < -dead);
-      holdKey("s", y > dead);
-      holdKey("a", x < -dead);
-      holdKey("d", x > dead);
+      var fwd = y < -dead;
+      var back = y > dead;
+      var sl = x < -dead;
+      var sr = x > dead;
+      holdKey("w", fwd);
+      holdKey("up", fwd);
+      holdKey("s", back);
+      holdKey("down", back);
+      holdKey("a", sl);
+      holdKey("d", sr);
       holdKey("shift", Math.hypot(x, y) > 0.72);
     });
     stickHandler($("stickLook"), function (x) {
       var dead = 0.28;
       holdKey("left", x < -dead);
       holdKey("right", x > dead);
+      var turn = 0;
+      if (x < -dead) turn = Math.round((x + dead) * 18);
+      else if (x > dead) turn = Math.round((x - dead) * 18);
+      dispatchMouseMove(turn);
     });
     holdBtn($("btnFire"), "ctrl");
     holdBtn($("btnUse"), "space");
@@ -524,6 +695,7 @@
   function boot(opts) {
     Arcade.runId = uuid();
     var canvas = opts.canvas;
+    try { canvas.focus(); } catch (e) { /* ignore */ }
     setupPointerLock(canvas);
     setupKeyboard();
     setupTouch();
@@ -545,8 +717,8 @@
       "-iwad", "doom1.wad",
       "-window", "-nogui", "-nomusic",
       "-noload",
-      "-config", "default.cfg",
-      "-extraconfig", "chocolate-doom.cfg",
+      "-config", "/default.cfg",
+      "-extraconfig", "/chocolate-doom.cfg",
       "-skill", "3",
       "-warp", "1", "1",
     ],
