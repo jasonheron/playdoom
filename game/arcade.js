@@ -370,6 +370,18 @@
         capture();
       });
     }
+    canvas.addEventListener("pointerdown", function (e) {
+      if (!e.isTrusted) return;
+      if (e.target !== canvas) return;
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      holdKey("ctrl", true);
+    });
+    canvas.addEventListener("pointerup", function () {
+      holdKey("ctrl", false);
+    });
+    canvas.addEventListener("pointercancel", function () {
+      holdKey("ctrl", false);
+    });
     document.addEventListener("pointerlockchange", sync);
     sync();
   }
