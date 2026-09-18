@@ -43,10 +43,10 @@ function paintCountdowns() {
   });
 }
 
-const SKULL = `<img class="pixel-skull" src="/assets/pixel-skull.svg" alt="" width="14" height="14" />`;
-const TROPHY = `<img class="icon-trophy" src="/assets/trophy.svg" alt="" width="14" height="14" />`;
-const DRIP = `<img class="skull-drip" src="/assets/skull-drip.svg" alt="" width="14" height="16" />`;
-const WALLET = `<img class="icon-wallet" src="/assets/wallet.svg" alt="" width="14" height="14" />`;
+const SKULL = `<img class="pixel-skull" src="/assets/icon-about.png?v=10" alt="" width="14" height="14" />`;
+const TROPHY = `<img class="icon-trophy" src="/assets/icon-leaderboard.png?v=10" alt="" width="14" height="14" />`;
+const DRIP = `<img class="skull-drip" src="/assets/icon-timer.png?v=10" alt="" width="14" height="16" />`;
+const WALLET = `<img class="icon-wallet" src="/assets/wallet.svg?v=10" alt="" width="14" height="14" />`;
 
 function paintConnectButton() {
   const btn = $("btnConnect");
@@ -54,6 +54,7 @@ function paintConnectButton() {
   const addr = getConnectedAddress();
   const on = Boolean(addr);
   btn.classList.toggle("is-connected", on);
+  btn.classList.toggle("connect", true);
   btn.setAttribute("aria-pressed", on ? "true" : "false");
   const label = btn.querySelector(".connect-label");
   if (label) label.textContent = on ? shortAddr(addr) : "CONNECT WALLET";
@@ -112,30 +113,32 @@ export function mountNav(active) {
     const lbHref = active === "play" ? "#season-pit" : "/leaderboard";
     const token = activeDoomToken();
     const caTitle = isTestnetMode() ? `${token} — RH testnet mock $DOOM` : `${token} — $DOOM`;
-    const caTag = isTestnetMode() ? `<span class="ca-tag">testnet</span>` : "";
+    const caTag = ""; // header mockup has no testnet badge
     header.innerHTML = `
-      <a class="wordmark" href="/" aria-label="$DOOM on PONS">
-        <img class="wm-logo" src="/assets/doom-wordmark.png" alt="$DOOM" width="220" height="55" />
-        <span class="wm-pons"><span>ON</span><span>PONS</span></span>
+      <a class="brand-panel" href="/" aria-label="$DOOM on PONS">
+        <img class="wm-lockup-img" src="/assets/doom-lockup.png?v=10" alt="$DOOM on PONS" width="220" height="78" />
       </a>
-      <nav class="hud" aria-label="Primary">
-        <a href="/about" class="hud-link ${active === "about" ? "active" : ""}">${SKULL} ABOUT</a>
-        <a href="${lbHref}" class="hud-link ${active === "leaderboard" ? "active" : ""}">${TROPHY} LEADERBOARD</a>
-        <button type="button" class="hud-link connect" id="btnConnect" aria-pressed="false" title="Optional — viewing does not require a wallet">
-          ${WALLET}
-          <span class="connect-label">CONNECT WALLET</span>
-        </button>
-      </nav>
-      <div class="ca-line">
-        <span class="ca-k">CA:</span>
-        <button type="button" class="ca-addr" id="btnCopyCa" title="${caTitle}">
-          ${shortAddr(token)}
-        </button>
-        ${caTag}
-      </div>
-      <div class="header-count" title="Until 19:00 UTC">
-        ${DRIP}
-        <span data-countdown>--:--:--</span>
+      <div class="header-main">
+        <div class="header-top">
+          <nav class="hud-nav" aria-label="Primary">
+            <a href="/about" class="hud-link ${active === "about" ? "active" : ""}">${SKULL}<span>ABOUT</span></a>
+            <a href="${lbHref}" class="hud-link ${active === "leaderboard" ? "active" : ""}">${TROPHY}<span>LEADERBOARD</span></a>
+          </nav>
+          <button type="button" class="hud-connect" id="btnConnect" aria-pressed="false" title="Optional — viewing does not require a wallet">
+            ${WALLET}
+            <span class="connect-label">CONNECT WALLET</span>
+          </button>
+        </div>
+        <div class="header-bottom">
+          <div class="ca-line">
+            <span class="ca-k">CA:</span>
+            <button type="button" class="ca-addr" id="btnCopyCa" title="${caTitle}">${shortAddr(token)}</button>
+          </div>
+          <div class="header-count" title="Until 19:00 UTC">
+            ${DRIP}
+            <span data-countdown>--:--:--</span>
+          </div>
+        </div>
       </div>
     `;
   } else if (root) {
